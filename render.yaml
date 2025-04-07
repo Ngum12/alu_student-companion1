@@ -10,8 +10,8 @@ services:
     region: ohio
     plan: free
     buildCommand: pip install -r backend/requirements.txt
-    # Use the app module directly
-    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    # IMPORTANT: Explicitly convert the PORT env var to match what uvicorn expects
+    startCommand: sh -c 'export PORT=${PORT:-8000} && uvicorn app:app --host 0.0.0.0 --port $PORT'
     envVars:
       - key: PYTHONPATH
         value: /opt/render/project/src
@@ -34,5 +34,5 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: VITE_API_URL
+      - key: VITE_API_KEY
         value: https://alu-companion-api.onrender.com

@@ -1,57 +1,104 @@
 """
-Entry point for Render deployment.
-This file helps locate the backend modules and import the FastAPI app correctly.
+Robust entry point for Render deployment that handles errors gracefully.
 """
 import os
 import sys
-import importlib.util
+import traceback
 from pathlib import Path
 
-# Add the project root and backend directories to the Python path
+# Add project paths to Python path
 current_dir = Path(__file__).parent.absolute()
 backend_dir = current_dir / "backend"
 sys.path.insert(0, str(current_dir))
 sys.path.insert(0, str(backend_dir))
 
-# Define placeholder/mock classes in case modules are missing
-class MockClass:
-    def __init__(self, *args, **kwargs):
-        pass
-    
-    def __getattr__(self, name):
-        return lambda *args, **kwargs: None
+# Create a minimal working FastAPI app as fallback
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import Dict, Any, Optional
 
-# Try to import the app or create placeholders if modules are missing
+# This will be our fallback app if the main app fails to load
+fallback_app = FastAPI(title="ALU Chatbot (Fallback Mode)")
+fallback_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class ChatRequest(BaseModel):
+    message: str
+    conversation_id: Optional[str] = None
+
+@fallback_app.get("/health")
+def health_check():
+    return {"status": "ok", "mode": "fallback"}
+
+@fallback_app.post("/api/chat")
+async def fallback_chat(request: ChatRequest):
+    return {
+        "response": "The full application failed to start. This is a minimal fallback mode. Please check the server logs.",
+        "source": "fallback"
+    }
+
+# Try to import the real app, use fallback if it fails
 try:
-    # First attempt: try to import the main app directly
-    from backend.main import app
-    print("Successfully imported FastAPI app from backend.main")
-except ModuleNotFoundError as e:
-    missing_module = str(e).split("'")[1]
-    print(f"Creating mock for missing module: {missing_module}")
+    print("Attempting to import the main FastAPI app...")
     
-    # Create an empty module for the missing import
-    spec = importlib.util.spec_from_loader(missing_module, loader=None)
-    missing_mod = importlib.util.module_from_spec(spec)
-    sys.modules[missing_module] = missing_mod
+    # Save original stdout and stderr
+    import io
+    original_stdout = sys.stdout
+    original_stderr = sys.stderr
+    stdout_buffer = io.StringIO()
+    stderr_buffer = io.StringIO()
+    sys.stdout = stdout_buffer
+    sys.stderr = stderr_buffer
     
-    # Add mock class to the module
-    setattr(missing_mod, 'DocumentProcessor', MockClass)
-    setattr(missing_mod, 'ExtendedRetrievalEngine', MockClass)
-    setattr(missing_mod, 'PromptEngine', MockClass)
-    setattr(missing_mod, 'NypthoIntegration', MockClass)
-    setattr(missing_mod, 'handle_question', lambda *args, **kwargs: {"source": "mock", "answer": "I'm a placeholder response."})
-    setattr(missing_mod, 'is_school_related', lambda *args: False)
-    setattr(missing_mod, 'ConversationMemory', MockClass)
+    try:
+        # Import the actual app
+        sys.path.insert(0, str(backend_dir))
+        
+        # First try direct import
+        try:
+            from main import app
+            print("Successfully imported app from main.py")
+        except ImportError:
+            # Try with backend prefix
+            from backend.main import app
+            print("Successfully imported app from backend.main")
+            
+        # If we get here, import succeeded
+        print("Main app imported successfully!")
+        
+    except Exception as e:
+        # If there's an error, log it and use fallback
+        error_details = traceback.format_exc()
+        print(f"Error importing main app: {str(e)}\n{error_details}")
+        app = fallback_app
+        print("Using fallback app due to import error")
     
-    # Try importing again now that we have mocks
-    from backend.main import app
-    print("Successfully imported FastAPI app using mocks")
+    finally:
+        # Restore stdout and stderr
+        sys.stdout = original_stdout
+        sys.stderr = original_stderr
+        
+        # Print the captured output
+        print("--- Import attempt output ---")
+        print(stdout_buffer.getvalue())
+        print("--- Import attempt errors ---")
+        print(stderr_buffer.getvalue())
+        print("---------------------------")
+        
+except Exception as outer_e:
+    print(f"Outer exception: {str(outer_e)}")
+    app = fallback_app
 
-# Print debug information
-print(f"Python version: {sys.version}")
+print(f"Final app used: {'Main app' if app != fallback_app else 'Fallback app'}")
 print(f"Current directory: {os.getcwd()}")
 print(f"Python path: {sys.path}")
-print(f"Available modules in backend: {os.listdir(backend_dir) if backend_dir.exists() else 'backend dir not found'}")
+print(f"Python version: {sys.version}")
+print(f"Available files in backend: {os.listdir(backend_dir) if backend_dir.exists() else 'backend dir not found'}")
 
 # This is necessary for Render to import the app
