@@ -1,4 +1,3 @@
-
 from typing import List, Dict, Any, Optional
 import re
 import time
@@ -21,6 +20,9 @@ class BrainSearchEngine:
         Enhanced semantic search in the ALU Brain knowledge base
         Uses advanced multi-layered scoring system with contextual relevance
         """
+        # Add this at the beginning of the search method
+        print(f"DEBUG: Search query: '{query}'")
+        
         # Track statistics
         self._search_stats["total_searches"] += 1
         start_time = time.time()
@@ -109,11 +111,21 @@ class BrainSearchEngine:
         # Add to cache
         self._store_in_cache(cache_key, top_results)
         
+        # Add this before returning results
+        if top_results:
+            print(f"DEBUG: Top result: {top_results[0]['category']} - {top_results[0]['entry'].get('question', 'No question')}")
+            print(f"DEBUG: Score breakdown: {top_results[0]['score_breakdown']}")
+        
         # Track processing time
         end_time = time.time()
         self._search_stats["processing_time"].append(end_time - start_time)
         
-        return top_results
+        # At the end of the search method, before returning top_results
+        if not results:
+            print("DEBUG: No results found for query!")
+            # Check if there's code here that adds default entrepreneurship content
+        
+        return top_results  # Return empty list if no results found
     
     def _preprocess_query(self, query: str) -> List[str]:
         """Process the query to extract meaningful terms"""
@@ -131,6 +143,10 @@ class BrainSearchEngine:
                      'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours'}
         
         terms = [term for term in query.split() if term not in stop_words and len(term) > 2]
+        
+        # Add this debug output
+        if not terms:
+            print(f"DEBUG: Query '{query}' produced no search terms after preprocessing!")
         
         # Check for important terms that might be filtered
         important_terms = ['fee', 'due', 'pay', 'gpa', 'job', 'tax', 'aid', 'lab', 'web']
@@ -217,6 +233,9 @@ class BrainSearchEngine:
                 if re.search(word_pattern, text):
                     score += 1.5 * weight
         
+        # Add minimum score threshold to prevent weak matches
+        if score < 0.5 * weight:  # Require a minimum relevant score
+            return 0
         return score
     
     def _calculate_category_relevance(self, category: str, query_terms: List[str], query_topics: List[str]) -> float:
@@ -325,8 +344,12 @@ class BrainSearchEngine:
     
     def _clean_cache(self) -> None:
         """Remove expired cache entries"""
-        if len(self._search_cache) > 100:  # Only clean if cache is large
-            now = time.time()
-            expired_keys = [k for k, v in self._search_cache.items() if now - v[0] > self._cache_ttl]
-            for k in expired_keys:
-                del self._search_cache[k]
+        # Clear the entire cache for now to rule out cache issues
+        self._search_cache = {}
+        
+        # Alternatively, use the original implementation:
+        # if len(self._search_cache) > 100:  # Only clean if cache is large
+        #     now = time.time()
+        #     expired_keys = [k for k, v in self._search_cache.items() if now - v[0] > self._cache_ttl]
+        #     for k in expired_keys:
+        #         del self._search_cache[k]

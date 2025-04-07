@@ -1,5 +1,6 @@
 import os
 import json
+import random
 import uvicorn
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,6 +13,7 @@ from retrieval_engine_extended import ExtendedRetrievalEngine
 from prompt_engine import PromptEngine
 from prompt_engine.nyptho_integration import NypthoIntegration
 from enhanced_capabilities.capability_router import handle_question, is_school_related
+from enhanced_capabilities.conversation_memory import ConversationMemory
 
 # Create FastAPI app
 app = FastAPI(title="ALU Chatbot Backend")
@@ -30,6 +32,9 @@ document_processor = DocumentProcessor()
 retrieval_engine = ExtendedRetrievalEngine()
 prompt_engine = PromptEngine()
 nyptho = NypthoIntegration()  # Initialize Nyptho
+conversation_memory = ConversationMemory(persistence_path="./data/conversations.json")
+# Try to load existing conversations
+conversation_memory.load_from_disk()
 
 # Define request models
 class ChatRequest(BaseModel):
@@ -86,84 +91,90 @@ async def health():
 @app.post("/api/chat")
 async def process_chat(request: ChatRequest):
     user_message = request.message
+    user_id = request.options.get("user_id", "anonymous") if request.options else "anonymous"
+    conversation_id = request.options.get("conversation_id") if request.options else None
     
-    # First, check if this is a specialized query that should use enhanced capabilities
-    if not is_school_related(user_message):
-        try:
-            # Use the enhanced capabilities router
-            result = handle_question(
-                user_message,
-                search_school_docs_func=lambda q: retrieval_engine.search(q)
-            )
-            
-            # Format the response based on which capability handled it
-            if result["source"] == "math_solver":
-                steps = "\n".join(result["additional_info"]) if result["additional_info"] else ""
-                response = f"{result['answer']}\n\n{steps}"
-            
-            elif result["source"] == "web_search":
-                snippets = result["additional_info"]["snippets"][:2]  # Limit to first 2 snippets
-                links = result["additional_info"]["links"][:2]  # Limit to first 2 links
-                
-                sources = ""
-                for i, link in enumerate(links):
-                    sources += f"\n- [{link}]({link})"
-                
-                response = f"{result['answer']}\n\nSources:{sources}"
-                
-            elif result["source"] == "code_support":
-                # The code support module already formats a nice response
-                response = result["answer"]
-                
-            else:
-                response = result["answer"]
-                
-            return {"response": response}
-        
-        except Exception as e:
-            # Fall back to the existing document retrieval system if there's an error
-            print(f"Enhanced capabilities error: {e}")
-            # Continue to existing code...
+    print(f"Processing message: '{user_message}'")
+    print(f"Is school related: {is_school_related(user_message)}")
     
-    # Original document search functionality
     try:
-        # Extract the user message
-        query = request.message
+        # Add user message to conversation memory
+        conversation_memory.add_message(user_id, "user", user_message, conversation_id)
         
-        # Convert history format if needed
-        conversation_history = []
-        for item in request.history:
-            role = item.get("role", "user")
-            content = item.get("content", "")
-            conversation_history.append({"role": role, "content": content})
+        # Get conversation history for context
+        conversation = conversation_memory.get_active_conversation(user_id)
+        conversation_history = conversation.get_formatted_history()
         
-        # Get the role from options or default to student
-        role = "student"
-        if request.options and "role" in request.options:
-            role = request.options["role"]
+        # First, check if this is a specialized query that should use enhanced capabilities
+        if not is_school_related(user_message):
+            try:
+                print(f"Trying enhanced capabilities for: '{user_message}'")
+                
+                # Use the enhanced capabilities router
+                result = handle_question(
+                    user_message,
+                    search_school_docs_func=lambda q: retrieval_engine.retrieve_context(q),
+                    conversation_history=conversation_history
+                )
+                
+                print(f"Selected capability: {result['source']}")
+                
+                # Format the response based on which capability handled it
+                if result["source"] == "math_solver":
+                    steps = "\n".join(result["additional_info"]) if result["additional_info"] else ""
+                    response = f"{result['answer']}\n\n{steps}"
+                elif result["source"] == "web_search":
+                    snippets = result["additional_info"]["snippets"][:2] if "snippets" in result["additional_info"] else []
+                    links = result["additional_info"]["links"][:2] if "links" in result["additional_info"] else []
+                    
+                    sources = ""
+                    for i, link in enumerate(links):
+                        sources += f"\n- [{link}]({link})"
+                    
+                    response = f"{result['answer']}\n\nSources:{sources}"
+                elif result["source"] == "code_support":
+                    # Properly format code responses
+                    code_result = result.get("additional_info", {})
+                    language = code_result.get("language", "text")
+                    code = code_result.get("code", "")
+                    
+                    # Format with proper code blocks
+                    response = f"{result['answer']}\n\n```{language}\n{code}\n```"
+                else:
+                    response = result["answer"]
+                
+                # Add AI response to conversation memory
+                conversation_memory.add_message(user_id, "assistant", response, conversation.id)
+                
+                # Periodically save conversations to disk
+                if random.random() < 0.1:  # 10% chance to save after each message
+                    conversation_memory.save_to_disk()
+                
+                return {
+                    "response": response,
+                    "conversation_id": conversation.id
+                }
+            except Exception as e:
+                print(f"Enhanced capabilities error: {e}")
+                # Continue to existing document retrieval code
         
         # Get relevant context from the retrieval engine
         context_docs = retrieval_engine.retrieve_context(
-            query=query,
-            role=role
+            query=user_message,
+            role="student"  # Default role
         )
         
         # Generate response using the prompt engine
         response = prompt_engine.generate_response(
-            query=query,
+            query=user_message,
             context=context_docs,
             conversation_history=conversation_history,
-            role=role,
-            options=request.options
+            role="student",
+            options={}
         )
         
-        # Have Nyptho observe this interaction
-        nyptho.observe_model(
-            query=query,
-            response=response,
-            model_id="alu_prompt_engine",
-            context=context_docs
-        )
+        # Add AI response to conversation memory
+        conversation_memory.add_message(user_id, "assistant", response, conversation.id)
         
         # Extract sources for attribution
         sources = []
@@ -179,11 +190,13 @@ async def process_chat(request: ChatRequest):
         return {
             "response": response,
             "sources": sources,
-            "engine": "alu_prompt_engine"
+            "engine": "alu_prompt_engine",
+            "conversation_id": conversation.id
         }
+        
     except Exception as e:
-        print(f"Error processing chat message: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Error processing chat: {e}")
+        return {"response": "I'm sorry, I couldn't process your request due to a technical error."}
 
 @app.post("/generate")
 async def generate_response(request: QueryRequest):
@@ -338,77 +351,6 @@ async def get_search_stats():
     except Exception as e:
         print(f"Error getting search stats: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/chat")
-async def chat(request: ChatRequest):
-    user_message = request.message
-    
-    # First, check if this is a specialized query that should use enhanced capabilities
-    if not is_school_related(user_message):
-        try:
-            # Use the enhanced capabilities router
-            result = handle_question(
-                user_message,
-                search_school_docs_func=lambda q: retrieval_engine.retrieve_context(q)
-            )
-            
-            # Format the response based on which capability handled it
-            if result["source"] == "math_solver":
-                steps = "\n".join(result["additional_info"]) if result["additional_info"] else ""
-                response = f"{result['answer']}\n\n{steps}"
-            elif result["source"] == "web_search":
-                snippets = result["additional_info"]["snippets"][:2]  # Limit to first 2 snippets
-                links = result["additional_info"]["links"][:2]  # Limit to first 2 links
-                
-                sources = ""
-                for i, link in enumerate(links):
-                    sources += f"\n- [{link}]({link})"
-                
-                response = f"{result['answer']}\n\nSources:{sources}"
-            elif result["source"] == "code_support":
-                response = result["answer"]
-            else:
-                response = result["answer"]
-            
-            return {"response": response}
-        except Exception as e:
-            print(f"Enhanced capabilities error: {e}")
-    
-    # Fall back to original document retrieval
-    try:
-        # Get relevant context from the retrieval engine
-        context_docs = retrieval_engine.retrieve_context(
-            query=user_message,
-            role="student"  # Default role
-        )
-        
-        # Generate response using the prompt engine
-        response = prompt_engine.generate_response(
-            query=user_message,
-            context=context_docs,
-            conversation_history=[],
-            role="student",
-            options={}
-        )
-        
-        # Extract sources for attribution
-        sources = []
-        for doc in context_docs[:3]:  # Top 3 sources
-            if doc.metadata and 'source' in doc.metadata:
-                source = {
-                    'title': doc.metadata.get('title', 'ALU Knowledge Base'),
-                    'source': doc.metadata.get('source', 'ALU Brain')
-                }
-                if source not in sources:  # Avoid duplicates
-                    sources.append(source)
-        
-        return {
-            "response": response,
-            "sources": sources
-        }
-    except Exception as e:
-        print(f"Error in document retrieval fallback: {e}")
-        return {"response": "I'm sorry, I couldn't process your request due to a technical error."}
 
 # Run the server
 if __name__ == "__main__":

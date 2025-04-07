@@ -1,4 +1,3 @@
-
 import random
 import time
 import re
@@ -71,11 +70,23 @@ class ResponseGenerator:
         # Sort by score if available
         alu_brain_docs.sort(key=lambda x: x.score if x.score is not None else 0, reverse=True)
         
+        # Add this after sorting the documents
+        if alu_brain_docs and hasattr(alu_brain_docs[0], 'score') and alu_brain_docs[0].score is not None:
+            top_score = alu_brain_docs[0].score
+        else:
+            top_score = 0.5  # Default score when none available
+            
+        min_acceptable_score = max(0.5, top_score * 0.7)  # At least 70% as relevant as top doc
+
         response_parts = []
         used_categories = set()
         doc_count = 0
         
         for doc in alu_brain_docs:
+            doc_score = getattr(doc, 'score', None)
+            if doc_score is None or doc_score < min_acceptable_score:
+                continue  # Skip documents that aren't relevant enough
+                
             # Limit to max 3 documents for conciseness
             if doc_count >= 3:
                 break
@@ -206,7 +217,7 @@ class ResponseGenerator:
         return response
     
     def _generate_general_response(self, query: str, context: List[Document], role: str) -> str:
-        """Generate a response using non-ALU Brain context"""
+        """Generate a response using non-ALU Brain context with a friendly tone"""
         query_lower = query.lower()
         response = ""
         
@@ -216,30 +227,60 @@ class ResponseGenerator:
             context.sort(key=lambda x: x.score if x.score is not None else 0, reverse=True)
             best_doc = context[0]
             
-            title = "About Your Query"
+            # REMOVED: No more "About Your Query" heading
+            # Instead, use a friendly opener based on the query content
             
             # Extract most relevant content
             content = best_doc.text[:400]  # Limit length
             
-            response = f"## {title}\n\n{content}"
+            # Create friendly opening based on query content
+            if "graduation" in query_lower:
+                opener = "🎓 Congratulations on your journey toward graduation! "
+            elif "course" in query_lower or "class" in query_lower:
+                opener = "📚 Ready to dive into some exciting learning? "
+            elif "campus" in query_lower:
+                opener = "🏫 Our beautiful campuses are waiting for you! "
+            elif "scholarship" in query_lower or "financial" in query_lower:
+                opener = "💰 Let's make your education more affordable! "
+            elif "deadline" in query_lower:
+                opener = "⏰ Don't worry, I've got the important dates for you! "
+            elif "faculty" in query_lower or "professor" in query_lower:
+                opener = "👨‍🏫 Our amazing faculty members are here to support you! "
+            elif "help" in query_lower or "confused" in query_lower:
+                opener = "🤗 We've all been there! Let me help clear things up: "
+            elif "thank" in query_lower:
+                opener = "😊 You're very welcome! Here's what you asked about: "
+            else:
+                # Use rotating friendly openers for general queries
+                friendly_openers = [
+                    "✨ Great question! ",
+                    "🔍 I found just what you're looking for! ",
+                    "💡 Here's something helpful: ",
+                    "🌟 I'm happy to share this with you: ",
+                    "🚀 Let's explore this together: "
+                ]
+                opener = random.choice(friendly_openers)
+            
+            response = f"{opener}{content}"
             
             if best_doc.metadata.get('source'):
                 response += f"\n\n*Source: {best_doc.metadata.get('source')}*"
         else:
             # Create role-specific responses when no context is available
+            # [Keep your existing role-specific responses but add friendly emojis]
             if role == "admin":
-                response = "## Administrative Information\n\nAs an ALU administrator, you have access to various systems and tools to help manage university operations. If you need specific information about administrative procedures, please provide more details about your query."
+                response = "🔑 **Administrative Tools & Resources**\n\nAs an ALU administrator, you have access to various systems and tools to help manage university operations. If you need specific information about administrative procedures, please provide more details about your query."
             elif role == "faculty":
-                response = "## Faculty Resources\n\nAs a faculty member at ALU, you can access various teaching resources and student management tools. For more specific guidance on course materials or academic processes, please provide additional details about your requirements."
+                response = "👨‍🏫 **Faculty Resources**\n\nAs a faculty member at ALU, you can access various teaching resources and student management tools. For more specific guidance on course materials or academic processes, please provide additional details about your requirements."
             else:  # student or default
                 if "course" in query_lower or "class" in query_lower:
-                    response = "## ALU Courses\n\nALU's curriculum is designed to be practical and focused on developing leadership skills. Courses integrate real-world challenges and emphasize both technical expertise and soft skills development. For specific course information, please mention the course name or code."
+                    response = "📚 **ALU Courses**\n\nALU's curriculum is designed to be practical and focused on developing leadership skills. Courses integrate real-world challenges and emphasize both technical expertise and soft skills development. For specific course information, please mention the course name or code."
                 elif "assignment" in query_lower or "homework" in query_lower:
-                    response = "## Assignment Guidelines\n\nALU assignments are designed to be practical and applicable to real-world situations. When working on assignments, make sure to:\n\n1. Follow the rubric carefully\n2. Connect concepts to real-world scenarios\n3. Demonstrate critical thinking\n4. Cite sources properly\n5. Submit before the deadline through the designated platform"
+                    response = "✍️ **Assignment Guidelines**\n\nALU assignments are designed to be practical and applicable to real-world situations. When working on assignments, make sure to:\n\n1. Follow the rubric carefully\n2. Connect concepts to real-world scenarios\n3. Demonstrate critical thinking\n4. Cite sources properly\n5. Submit before the deadline through the designated platform"
                 elif "campus" in query_lower or "facility" in query_lower:
-                    response = "## Campus Facilities\n\nALU campuses feature state-of-the-art facilities designed to enhance the learning experience, including:\n\n* Collaborative learning spaces\n* Technology labs with modern equipment\n* Library and research resources\n* Student social areas\n* Quiet study zones\n* Sports and recreation facilities"
+                    response = "🏫 **Campus Facilities**\n\nALU campuses feature state-of-the-art facilities designed to enhance the learning experience, including:\n\n* Collaborative learning spaces\n* Technology labs with modern equipment\n* Library and research resources\n* Student social areas\n* Quiet study zones\n* Sports and recreation facilities"
                 else:
-                    response = "## African Leadership University\n\nALU is committed to developing the next generation of African leaders through innovative education approaches. Our programs focus on real-world challenges and developing both technical expertise and leadership capabilities.\n\nFor more specific information about programs, admissions, or campus life, please provide additional details about your area of interest."
+                    response = "🦁 **African Leadership University**\n\nALU is committed to developing the next generation of African leaders through innovative education approaches. Our programs focus on real-world challenges and developing both technical expertise and leadership capabilities.\n\nFor more specific information about programs, admissions, or campus life, please provide additional details about your area of interest."
         
         return response
     
@@ -254,12 +295,42 @@ class ResponseGenerator:
             return "Here's some information based on your request:"
     
     def _create_closing(self, query: str, role: str) -> str:
-        """Create an appropriate closing based on the query and role"""
-        closings = [
-            "I hope this information helps. If you have more questions, feel free to ask.",
-            "Please let me know if you need any clarification or have further questions.",
-            "For more detailed information, you can always consult the official ALU resources."
-        ]
+        """Create a friendly, personalized closing based on the query and role"""
+        query_lower = query.lower()
+        
+        # Different closings for different types of queries
+        if "thank" in query_lower:
+            closings = [
+                "😊 You're very welcome! Always happy to help you succeed at ALU!",
+                "🙌 Anytime! Your success is what we're here for!",
+                "💫 It's my pleasure to help! Let me know if you need anything else!"
+            ]
+        elif "help" in query_lower or "problem" in query_lower:
+            closings = [
+                "🤝 I hope that helps! Remember, challenges are just opportunities in disguise!",
+                "💪 You've got this! And the ALU community is here to support you every step of the way.",
+                "🌈 Don't hesitate to reach out again if you need more guidance. We're in this together!"
+            ]
+        elif "graduation" in query_lower or "future" in query_lower:
+            closings = [
+                "🎓 Wishing you all the best on your journey to graduation and beyond!",
+                "🚀 The future is bright for ALU graduates! Keep pushing forward!",
+                "⭐ Your ALU journey is preparing you for amazing things ahead!"
+            ]
+        elif "deadline" in query_lower or "worried" in query_lower:
+            closings = [
+                "⏰ Don't worry! With good planning, you'll meet those deadlines successfully!",
+                "📅 Take a deep breath - you've got this! One step at a time.",
+                "🌟 Stay organized and focused. You're more capable than you realize!"
+            ]
+        else:
+            closings = [
+                "✨ Hope this helps! Feel free to ask if you have more questions!",
+                "🌍 Making a difference in Africa starts with being well-informed. Glad I could help!",
+                "💡 Anything else you're curious about? I'm here to support your ALU journey!",
+                "🦁 The ALU pride is always here to help you succeed!",
+                "🌟 Wishing you an amazing day filled with learning and growth!"
+            ]
         
         return random.choice(closings)
     

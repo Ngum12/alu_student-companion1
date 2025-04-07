@@ -1,114 +1,154 @@
 import re
-from typing import Dict, Any
+from typing import Dict, Any, List, Callable
 
-# Import the specific capability handlers
-from .math_solver import solve_math_with_sympy
-from .web_lookup import search_web_duckduckgo
-from .general_qa import ask_transformer_model
+# Fix the imports to match the implementations
+from .math_solver import is_math_question, solve_math_problem
+from .web_lookup import is_general_knowledge_question, search_web
 from .code_support import is_code_question, handle_code_question
 
 def is_school_related(question: str) -> bool:
-    """Determine if a question is related to school documents."""
-    school_keywords = ["course", "syllabus", "lecture", "class", "professor", 
-                      "assignment", "exam", "quiz", "grade"]
-    
-    return any(keyword.lower() in question.lower() for keyword in school_keywords)
-
-def is_math_question(question: str) -> bool:
-    """Determine if a question is mathematical in nature."""
-    math_keywords = ["solve", "calculate", "compute", "evaluate", "simplify", 
-                    "factor", "expand", "integrate", "differentiate", "derivative", 
-                    "equation", "expression", "formula"]
-    
-    # Check for math symbols
-    math_symbols = ["+", "-", "*", "/", "=", "<", ">", "^", "√", "∫", "∑", "≠", "≤", "≥"]
-    has_math_symbols = any(symbol in question for symbol in math_symbols)
-    
-    # Check for numbers with operations
-    has_numbers_with_operations = bool(re.search(r'\d+\s*[+\-*/^]\s*\d+', question))
-    
-    return (any(keyword.lower() in question.lower() for keyword in math_keywords) or 
-            has_math_symbols or has_numbers_with_operations)
-
-def is_general_knowledge(question: str) -> bool:
-    """Determine if a question is general knowledge that can be answered locally."""
-    question_starters = ["what", "who", "when", "where", "why", "how", "which", "did", "is", "are", "can"]
-    question_lower = question.lower()
-    return any(question_lower.startswith(starter) for starter in question_starters) or any(f" {starter} " in question_lower for starter in question_starters)
-
-def handle_question(question: str, search_school_docs_func=None) -> Dict[str, Any]:
     """
-    Route questions to appropriate handler based on content.
+    Determine if a question is related to school/academic matters.
     
     Args:
         question: The user's question
-        search_school_docs_func: Your existing function for searching school documents
+        
+    Returns:
+        True if it appears to be school-related, False otherwise
+    """
+    # Keywords that suggest school-related questions
+    school_keywords = [
+        "alu", "african leadership university", "campus", "course", "class", "professor",
+        "teacher", "lecturer", "student", "degree", "major", "minor", "graduation",
+        "academic", "semester", "term", "grade", "exam", "test", "assignment",
+        "homework", "deadline", "syllabus", "tuition", "scholarship", "financial aid",
+        "dormitory", "residence hall", "library", "textbook", "schedule"
+    ]
+    
+    question_lower = question.lower()
+    
+    # Check for the presence of school-related keywords
+    for keyword in school_keywords:
+        if keyword in question_lower:
+            return True
+    
+    return False
+
+def handle_question(
+    question: str, 
+    search_school_docs_func=None,
+    conversation_history=None
+) -> Dict[str, Any]:
+    """
+    Route a question to the appropriate enhanced capability.
+    
+    Args:
+        question: The user's question
+        search_school_docs_func: Function to search school documents
+        conversation_history: Optional conversation history for context
         
     Returns:
         Dict containing:
-            - answer: The text response
-            - source: Which system generated the answer
-            - additional_info: Any supplementary information
+            - answer: The response
+            - source: Which capability handled it
+            - additional_info: Any additional information (like steps for math)
     """
+    print(f"Routing question: '{question}'")
+    
+    # 1. First, check if it's a greeting/simple message (don't route these)
+    greeting_patterns = [
+        r"^hi\b", r"^hello\b", r"^hey\b", r"^good\s+(morning|afternoon|evening|day)",
+        r"^thanks", r"^thank\s+you", r"^ok\b", r"^okay\b", r"^\s*$"
+    ]
+    
+    for pattern in greeting_patterns:
+        if re.search(pattern, question.lower()):
+            print("Detected as greeting/simple message")
+            return {
+                "answer": "Hello! How can I help you today?",
+                "source": "greeting",
+                "additional_info": {}
+            }
+    
+    # 2. Check if it's geographical/knowledge question (should be handled by web search)
+    geo_patterns = [
+        r"capital\s+of", r"where\s+is", r"location\s+of", r"country", 
+        r"city", r"continent", r"population\s+of", r"president\s+of"
+    ]
+    
+    for pattern in geo_patterns:
+        if re.search(pattern, question.lower()):
+            print("Detected as geographical/knowledge question")
+            try:
+                search_result = search_web(question, conversation_history)
+                return {
+                    "answer": search_result.get("answer", "I couldn't find information about this."),
+                    "source": "web_search",
+                    "additional_info": {
+                        "snippets": search_result.get("snippets", []),
+                        "links": search_result.get("links", [])
+                    }
+                }
+            except Exception as e:
+                print(f"Web search error: {e}")
+                # Fall through to other options
+    
+    # 3. Try code support
     if is_code_question(question):
         try:
             result = handle_code_question(question)
-            
-            response_text = result["answer"]
-            
-            if "explanation" in result:
-                response_text += "\n\n" + result["explanation"]
-                
-            if "code" in result and result.get("type") == "generate":
-                response_text += f"\n\n```{result.get('language', '')}\n{result['code']}\n```"
-                
-            if "fixed_code" in result:
-                response_text += f"\n\n**Fixed Code:**\n```{result.get('language', '')}\n{result['fixed_code']}\n```"
-            
             return {
-                "answer": response_text,
+                "answer": result.get("answer", "I couldn't analyze this code."),
                 "source": "code_support",
                 "additional_info": result
             }
         except Exception as e:
             print(f"Code support error: {e}")
     
-    if is_school_related(question) and search_school_docs_func:
+    # 4. Try math solving (make sure the question actually has numbers or math symbols)
+    if is_math_question(question) and re.search(r'[0-9+\-*/^=]', question):
         try:
-            result = search_school_docs_func(question)
+            answer, steps = solve_math_problem(question)
             return {
-                "answer": result.get("answer", ""),
-                "source": "school_documents",
-                "additional_info": result.get("source_documents", [])
-            }
-        except Exception as e:
-            print(f"Error in school docs search: {e}")
-    
-    if is_math_question(question):
-        try:
-            result = solve_math_with_sympy(question)
-            return {
-                "answer": result.get("answer", ""),
+                "answer": answer,
                 "source": "math_solver",
-                "additional_info": result.get("steps", [])
+                "additional_info": steps
             }
         except Exception as e:
             print(f"Math solver error: {e}")
     
-    try:
-        results = search_web_duckduckgo(question)
-        return {
-            "answer": results.get("answer", ""),
-            "source": "web_search",
-            "additional_info": {
-                "snippets": results.get("snippets", []),
-                "links": results.get("links", [])
+    # 5. Try web search for other general knowledge (most flexible)
+    if is_general_knowledge_question(question):
+        try:
+            # Pass conversation history to web search
+            search_result = search_web(question, conversation_history)
+            return {
+                "answer": search_result.get("answer", "I couldn't find information about this."),
+                "source": "web_search",
+                "additional_info": {
+                    "snippets": search_result.get("snippets", []),
+                    "links": search_result.get("links", [])
+                }
             }
-        }
-    except Exception as e:
-        print(f"Web search error: {e}")
-        return {
-            "answer": f"I'm sorry, I encountered an error while trying to answer your question: {str(e)}",
-            "source": "error",
-            "additional_info": {}
-        }
+        except Exception as e:
+            print(f"Web search error: {e}")
+    
+    # 6. If we got here, use the provided search function if available
+    if search_school_docs_func:
+        try:
+            docs = search_school_docs_func(question)
+            # Process docs here if needed
+            return {
+                "answer": "I found some information in our knowledge base that might help.",
+                "source": "document_search",
+                "additional_info": {"docs": docs}
+            }
+        except Exception as e:
+            print(f"Document search error: {e}")
+    
+    # 7. Default fallback
+    return {
+        "answer": "I don't have enough information to answer that question.",
+        "source": "fallback",
+        "additional_info": {}
+    }

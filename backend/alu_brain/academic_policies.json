@@ -1,7 +1,6 @@
-
 {
   "category": "academic_policies",
-  "description": "Information about grading, attendance, academic integrity, and graduation requirements",
+  "description": "Information about grading, attendance, academic integrity, graduation requirements, faculty members, university partnerships, and ALU's educational model.",
   "entries": [
     {
       "id": "pol_001",
@@ -58,6 +57,174 @@
       "question": "What are the graduation requirements?",
       "answer": "To graduate from ALU, students must: complete 120 credit hours, maintain a cumulative GPA of 2.0 or higher, complete all major and core curriculum requirements, complete at least one internship or practical experience, fulfill the leadership capstone project, and have no outstanding financial obligations to the university.",
       "additional": "All students must submit a graduation application by the posted deadline, typically one term before intended graduation."
+    },
+    {
+      "id": "pol_007",
+      "type": "long_response",
+      "question": "Who are the faculty members at ALU and what do they teach?",
+      "answer": "**Foundational Learning Coaches:**\n- **Lizbeth Uwineza:** Focuses on improving students' communication skills and fostering effective dialogue.\n- **Sylidio Masengesho:** Designs innovative curricula and promotes learner-centered educational experiences.\n- **Ruth Bazing:** Teaches Communication and Media Studies, emphasizing creativity and critical thinking.\n\n**Business, Environment, and Leadership (BEL) Team:**\n- **Arnaud Michel Nibaruta:** BEL Project Manager, oversees project operations and teaches courses in health technology and healthcare management.\n- **Ryan Johnson:** BEL Program Lead, designs and delivers BEL curricula, specializing in economics and finance.\n- **Dr. Chioma Joy Okonkwo:** BEL Program Lead, combines environmental science and leadership expertise to teach sustainable development and ecological solutions.\n\n**Professional Learning Coaches (Business, Strategy, and Investment):**\n- **Mildred Kasaya Amugune:** Teaches courses on financial inclusion and business strategy.\n- **Nicholas Ssekiziyivu:** Focuses on data-driven decision-making in business management and entrepreneurship.\n- **Dennis Ngobi:** Teaches entrepreneurship and international business, with a focus on youth empowerment.\n\n**Professional Learning Coach (Policy and Advocacy):**\n- **Celma Costa:** Teaches courses on politics, gender, climate change, and innovation.\n\n**Software Engineering (SE) Team:**\n- **Binusha Balachandran:** SE Program Lead, manages academic delivery for SE and teaches system software and performance analysis.\n- **Marvin Ogore:** SE Learning Coach (Machine Learning), teaches machine learning and IoT-embedded systems.\n- **Pelin Mutanguha:** SE Learning Coach, specializes in full-stack web development.\n- **Wakuma Tekalign Debela:** SE Learning Coach, focuses on web development technologies and best practices.\n- **Herve Musangwa:** SE Learning Coach, teaches Linux, version control, Python, and databases.\n- **Neza David Tuyishimire:** SE Learning Coach, covers software engineering, machine learning, and AI.\n- **Samiratu Ntohsi:** SE Machine Learning Coach, teaches mobile app development (Flutter) and machine learning.\n\n**International Business and Trade Faculty:**\n- **Sylvie Ndahimana:** Emphasizes sustainable entrepreneurship and leadership.\n- **Dr. Sixbert Sangwa:** Teaches courses on business development and nonprofit management."
+    },
+    {
+      "id": "pol_008",
+      "type": "paragraph_response",
+      "question": "What partnerships does ALU have with other institutions?",
+      "answer": "ALU has established strategic educational partnerships to enhance the quality and recognition of its programs. Glasgow Caledonian University (GCU) serves as ALU Mauritius' founding academic and accreditation partner, offering internationally recognized UK degrees. The university is also part of the African Leadership Group, a collective aiming to develop 2 million ethical, entrepreneurial African leaders by 2030. Additionally, ALU collaborates with various other educational institutions to ensure global recognition and academic quality of its degrees, facilitating student exchanges, research collaborations, and international learning opportunities."
+    },
+    {
+      "id": "pol_009",
+      "type": "paragraph_response",
+      "question": "What is ALU's educational mission and learning model?",
+      "answer": "ALU's mission is to develop ethical and entrepreneurial leaders through a unique learning model that combines real-world experiences with self-directed education. The learning model emphasizes student autonomy, hands-on learning, and problem-solving skills to address global challenges, moving beyond traditional lecture-based instruction to embrace project-based learning and practical skill development. ALU degrees are fully accredited and internationally recognized for their innovation and quality, with campuses located in Mauritius and Rwanda, providing diverse learning environments and opportunities for students across Africa and beyond."
+    },
+    {
+      "id": "fac_001",
+      "type": "short_response",
+      "question": "Who teaches machine learning?",
+      "answer": "ALU has two faculty members who teach machine learning: Marvin Ogore (SE Learning Coach specialized in Machine Learning and IoT-embedded systems) and Samiratu Ntohsi (SE Machine Learning Coach who teaches mobile app development with Flutter and machine learning)."
+    },
+    {
+      "id": "fac_002",
+      "type": "short_response",
+      "question": "Who is the machine learning coach?",
+      "answer": "ALU has two machine learning coaches: Marvin Ogore (SE Learning Coach specialized in Machine Learning and IoT-embedded systems) and Samiratu Ntohsi (SE Machine Learning Coach who teaches mobile app development with Flutter and machine learning)."
+    },
+    {
+      "id": "fac_003",
+      "type": "short_response",
+      "question": "Who teaches ML?",
+      "answer": "At ALU, machine learning (ML) courses are taught by Marvin Ogore and Samiratu Ntohsi. Marvin focuses on ML and IoT-embedded systems, while Samiratu teaches ML alongside mobile app development using Flutter."
+    },
+    {
+      "id": "fac_004",
+      "type": "short_response",
+      "question": "Who's the web dev teacher?",
+      "answer": "ALU has several web development teachers. Pelin Mutanguha specializes in full-stack web development, and Wakuma Tekalign Debela focuses on web development technologies and best practices."
+    },
+    {
+      "id": "fac_005",
+      "type": "short_response",
+      "question": "Who do I go to for help with Python?",
+      "answer": "For help with Python programming, you should contact Herve Musangwa, who teaches Linux, version control, Python, and databases. He can provide assistance with Python-related questions and projects."
+    },
+    {
+      "id": "fac_006",
+      "type": "short_response",
+      "question": "Who teaches business courses?",
+      "answer": "ALU's business courses are taught by several faculty members including Mildred Kasaya Amugune (financial inclusion and business strategy), Nicholas Ssekiziyivu (business management and entrepreneurship), Dennis Ngobi (entrepreneurship and international business), Sylvie Ndahimana (sustainable entrepreneurship), and Dr. Sixbert Sangwa (business development)."
+    },
+    {
+      "id": "fac_007",
+      "type": "short_response",
+      "question": "Who leads the software engineering program?",
+      "answer": "The Software Engineering (SE) Program at ALU is led by Binusha Balachandran. As the SE Program Lead, she manages academic delivery for the program and teaches system software and performance analysis courses."
+    },
+    {
+      "id": "fac_008",
+      "type": "short_response",
+      "question": "Which teacher does communication skills?",
+      "answer": "Lizbeth Uwineza is the faculty member who focuses on improving students' communication skills and fostering effective dialogue at ALU. As a Foundational Learning Coach, she specializes in this area."
+    },
+    {
+      "id": "fac_009",
+      "type": "short_response",
+      "question": "Who are the BEL teachers?",
+      "answer": "The Business, Environment, and Leadership (BEL) team includes: Arnaud Michel Nibaruta (BEL Project Manager), Ryan Johnson (BEL Program Lead specializing in economics and finance), and Dr. Chioma Joy Okonkwo (BEL Program Lead focusing on environmental science and sustainable development)."
+    },
+    {
+      "id": "fac_010",
+      "type": "short_response",
+      "question": "Can someone teach me Flutter?",
+      "answer": "Yes, Samiratu Ntohsi is the SE Machine Learning Coach who teaches mobile app development using Flutter. If you're interested in learning Flutter, you should reach out to her for guidance and course information."
+    },
+    {
+      "id": "fac_011",
+      "type": "short_response",
+      "question": "Who teaches entrepreneurship?",
+      "answer": "Entrepreneurship at ALU is taught by several faculty members, including Dennis Ngobi (who focuses on entrepreneurship and international business with youth empowerment emphasis) and Sylvie Ndahimana (who emphasizes sustainable entrepreneurship and leadership). Nicholas Ssekiziyivu also covers entrepreneurship aspects in his business management courses."
+    },
+    {
+      "id": "fac_012",
+      "type": "short_response",
+      "question": "Who's in charge of the BEL program?",
+      "answer": "The Business, Environment, and Leadership (BEL) program has two Program Leads: Ryan Johnson (specializing in economics and finance) and Dr. Chioma Joy Okonkwo (focusing on environmental science and sustainable development). Arnaud Michel Nibaruta serves as the BEL Project Manager."
+    },
+    {
+      "id": "fac_013",
+      "type": "short_response",
+      "question": "Who can help me with AI?",
+      "answer": "For assistance with Artificial Intelligence (AI), you should contact Neza David Tuyishimire, who covers software engineering, machine learning, and AI. Marvin Ogore and Samiratu Ntohsi also have expertise in machine learning, which overlaps with AI topics."
+    },
+    {
+      "id": "fac_014",
+      "type": "short_response",
+      "question": "Who teaches foundational courses?",
+      "answer": "Foundational courses at ALU are taught by the Foundational Learning Coaches: Lizbeth Uwineza (communication skills), Sylidio Masengesho (innovative curricula design), and Ruth Bazing (Communication and Media Studies)."
+    },
+    {
+      "id": "fac_015",
+      "type": "short_response",
+      "question": "Who are the programming teachers?",
+      "answer": "Programming at ALU is taught by several faculty members: Herve Musangwa (Python), Pelin Mutanguha (full-stack development), Wakuma Tekalign Debela (web development), Samiratu Ntohsi (Flutter/mobile), Marvin Ogore (IoT systems), and Neza David Tuyishimire (software engineering)."
+    },
+    {
+      "id": "fac_016",
+      "type": "short_response",
+      "question": "Who teaches data science?",
+      "answer": "Data science topics at ALU are covered by Nicholas Ssekiziyivu (data-driven decision-making in business), Marvin Ogore and Samiratu Ntohsi (machine learning components), and Neza David Tuyishimire (AI and advanced analytics)."
+    },
+    {
+      "id": "fac_017",
+      "type": "short_response",
+      "question": "Who can help with capstone projects?",
+      "answer": "For capstone project guidance, approach the faculty member most aligned with your project focus. Arnaud Michel Nibaruta oversees BEL projects, Binusha Balachandran manages Software Engineering projects, and specific faculty advisors are assigned based on your project topic and area of study."
+    },
+    {
+      "id": "fac_018",
+      "type": "short_response",
+      "question": "Who do I talk to about environmental studies?",
+      "answer": "For environmental studies, Dr. Chioma Joy Okonkwo is your primary contact. As a BEL Program Lead, she combines environmental science expertise with leadership to teach sustainable development and ecological solutions."
+    },
+    {
+      "id": "fac_019",
+      "type": "short_response",
+      "question": "Who's teaching finance courses?",
+      "answer": "Finance courses at ALU are primarily taught by Ryan Johnson (BEL Program Lead specializing in economics and finance) and Mildred Kasaya Amugune (who covers financial inclusion alongside business strategy)."
+    },
+    {
+      "id": "fac_020",
+      "type": "short_response",
+      "question": "Who do I ask about international business?",
+      "answer": "For international business inquiries, contact Dennis Ngobi (who teaches entrepreneurship and international business) or faculty members in the International Business and Trade department like Sylvie Ndahimana and Dr. Sixbert Sangwa."
+    },
+    {
+      "id": "fac_021",
+      "type": "short_response",
+      "question": "Which teachers focus on leadership?",
+      "answer": "Leadership is a core focus across ALU, but faculty with specific leadership emphasis include the BEL Program Leads (Ryan Johnson and Dr. Chioma Joy Okonkwo), Sylvie Ndahimana (sustainable leadership), and the Foundational Learning Coaches who incorporate leadership development into their curriculum."
+    },
+    {
+      "id": "fac_022",
+      "type": "short_response",
+      "question": "Who teaches communication at ALU?",
+      "answer": "Communication at ALU is primarily taught by Lizbeth Uwineza, who focuses on improving students' communication skills and fostering effective dialogue, and Ruth Bazing, who teaches Communication and Media Studies with emphasis on creativity and critical thinking."
+    },
+    {
+      "id": "fac_023",
+      "type": "short_response",
+      "question": "Who are the learning coaches?",
+      "answer": "ALU has several types of Learning Coaches: Foundational Learning Coaches (Lizbeth Uwineza, Sylidio Masengesho, Ruth Bazing), Professional Learning Coaches (Mildred Kasaya Amugune, Nicholas Ssekiziyivu, Dennis Ngobi, Celma Costa), and Software Engineering Learning Coaches (Marvin Ogore, Pelin Mutanguha, Wakuma Tekalign Debela, Herve Musangwa, Neza David Tuyishimire, Samiratu Ntohsi)."
+    },
+    {
+      "id": "fac_024",
+      "type": "short_response",
+      "question": "Who teaches policy and advocacy?",
+      "answer": "Policy and Advocacy at ALU is taught by Celma Costa, who is a Professional Learning Coach focusing on politics, gender, climate change, and innovation in the policy space."
+    },
+    {
+      "id": "fac_025",
+      "type": "short_response",
+      "question": "Who should I talk to about research methods?",
+      "answer": "For research methods guidance, appropriate faculty depends on your field of study. For business research, contact Nicholas Ssekiziyivu or Dr. Sixbert Sangwa; for environmental research, Dr. Chioma Joy Okonkwo; for technical research, reach out to Binusha Balachandran or other Software Engineering faculty relevant to your research topic."
     }
   ]
 }

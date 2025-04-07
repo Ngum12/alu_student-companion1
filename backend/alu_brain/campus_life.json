@@ -1,32 +1,31 @@
-
 {
   "category": "campus_life",
-  "description": "Information about student life, housing, activities, and campus facilities",
+  "description": "Comprehensive and detailed information about all aspects of student life at ALU, including housing, dining, clubs, health services, recreational facilities, transportation, safety, cultural events, academic support, and campus maps. This document is designed to answer every possible question related to the campus experience.",
   "entries": [
     {
       "id": "camp_001",
       "type": "short_response",
       "question": "Where are ALU campuses located?",
-      "answer": "ALU has campuses in Rwanda (Kigali) and Mauritius (Beau Plan)."
+      "answer": "ALU has campuses in Rwanda (Kigali) and Mauritius (Beau Plan), offering unique learning environments that combine modern facilities with vibrant cultural experiences."
     },
     {
       "id": "camp_002",
       "type": "procedural_response",
       "question": "How do I apply for on-campus housing?",
-      "answer": "To apply for on-campus housing at ALU:\n1. Log in to your student portal\n2. Navigate to the 'Housing' section\n3. Complete the housing application form\n4. Submit your housing preferences\n5. Pay the housing deposit to secure your spot\n6. Wait for confirmation from the housing office",
-      "deadline": "Housing applications typically open 3 months before the start of each term"
+      "answer": "To apply for on-campus housing at ALU:\n1. Log in to your student portal.\n2. Navigate to the 'Housing' section.\n3. Complete and submit the housing application form along with your preferences.\n4. Pay the housing deposit to secure your spot.\n5. Wait for confirmation from the housing office.",
+      "deadline": "Housing applications typically open 3 months before the start of each term."
     },
     {
       "id": "camp_003",
       "type": "paragraph_response",
       "question": "What student clubs are available?",
-      "answer": "ALU offers a diverse range of student clubs and organizations catering to various interests. These include academic clubs like the Coding Club and Debate Society; cultural clubs celebrating different African traditions; athletic clubs for sports enthusiasts; and social impact groups working on community projects. Students are also encouraged to start their own clubs if they identify an interest not currently represented. Club activities are coordinated through the Student Life Office, which provides resources and support for club events and initiatives."
+      "answer": "ALU offers an extensive range of student clubs, including academic clubs (e.g. Coding Club, Debate Society, Entrepreneurship Hub), cultural clubs celebrating diverse traditions, athletic teams, and social impact groups dedicated to community service. Students are encouraged to form new clubs to express emerging interests. The Student Life Office supports clubs through funding, event planning, and logistical assistance."
     },
     {
       "id": "camp_004",
       "type": "table_response",
       "question": "What are the campus cafeteria hours?",
-      "answer": "The ALU campus dining facilities operate on the following schedule:",
+      "answer": "The dining facilities at ALU operate on the following schedule:",
       "table": {
         "headers": ["Facility", "Weekdays", "Weekends"],
         "rows": [
@@ -41,19 +40,19 @@
       "id": "camp_005",
       "type": "link_response",
       "question": "How can I access campus maps?",
-      "answer": "Campus maps are available through several digital platforms:",
+      "answer": "Campus maps are available through various digital platforms to help you navigate the campus:",
       "links": [
         {
           "text": "ALU Campus App",
-          "url": "https://campusapp.alueducation.com"
+          "url": "https://www.alueducation.com/campusapp"
         },
         {
           "text": "Interactive Web Map",
-          "url": "https://maps.alueducation.com"
+          "url": "https://www.alueducation.com/maps/interactive"
         },
         {
           "text": "Printable PDF Maps",
-          "url": "https://resources.alueducation.com/maps"
+          "url": "https://www.alueducation.com/maps/pdf"
         }
       ]
     },
@@ -61,7 +60,44 @@
       "id": "camp_006",
       "type": "long_response",
       "question": "What health services are available on campus?",
-      "answer": "ALU provides comprehensive health services to support student wellbeing. The on-campus Health Center offers primary care services including routine check-ups, vaccinations, basic medication dispensing, and first aid for minor injuries. For mental health support, counseling services are available with licensed professionals who offer individual therapy, group sessions, and crisis intervention.\n\nThe Health Center operates Monday through Friday from 8:00 AM to 6:00 PM, with an on-call medical professional available for emergencies outside these hours. All full-time students are enrolled in the university health program, which covers most on-campus services.\n\nFor specialized medical needs, the Health Center can provide referrals to partner hospitals and clinics in the surrounding area. Transportation to these facilities can be arranged through campus security for students without personal transportation.\n\nWellness workshops covering topics like stress management, nutrition, sexual health, and substance abuse prevention are offered regularly throughout the academic year."
+      "answer": "ALU provides comprehensive health services to support the wellbeing of all students. On-campus, the Health Center offers primary care (routine check-ups, immunizations, and minor injury treatment) alongside mental health services like counseling, group therapy, and stress management sessions. The Health Center operates Monday–Friday from 8:00 AM to 6:00 PM with on-call services available after hours. For specialized care, referrals to partner hospitals are arranged, and transportation assistance is provided if needed. Regular wellness workshops on nutrition, substance abuse prevention, and mental health awareness further promote student health."
+    },
+    {
+      "id": "camp_007",
+      "type": "paragraph_response",
+      "question": "What athletic and recreational facilities does ALU offer?",
+      "answer": "ALU’s campus boasts state-of-the-art athletic facilities including modern gymnasiums, outdoor sports fields, swimming pools, tennis courts, and dedicated areas for yoga and group fitness. Intramural sports leagues, seasonal tournaments, and recreational events are organized regularly to promote wellness and community participation."
+    },
+    {
+      "id": "camp_008",
+      "type": "paragraph_response",
+      "question": "How does ALU ensure campus safety and security?",
+      "answer": "Campus safety is paramount at ALU. The campus is secured 24/7 by professional security teams and advanced surveillance systems. Emergency hotlines, strict access controls, well-lit walkways, and regular safety drills help maintain a secure environment. In addition, a strong partnership with local law enforcement ensures rapid response in emergencies."
+    },
+    {
+      "id": "camp_009",
+      "type": "long_response",
+      "question": "What academic support and study facilities does ALU provide?",
+      "answer": "ALU offers robust academic support through a well-equipped library featuring extensive digital and print resources, quiet study rooms, and collaborative spaces. Additional facilities include computer labs, tutoring centers, writing assistance labs, and research support services. Workshops on time management, research methodologies, and presentation skills are held periodically to enhance academic success."
+    },
+    {
+      "id": "camp_010",
+      "type": "paragraph_response",
+      "question": "What transportation options are available on campus?",
+      "answer": "ALU makes commuting easy with several transportation options, including scheduled shuttle buses, bike-sharing programs, and designated parking areas. The campus shuttle connects key locations such as academic buildings, residence halls, and recreational centers, ensuring efficient and reliable transport for students and staff."
+    },
+    {
+      "id": "camp_011",
+      "type": "long_response",
+      "question": "What extracurricular and cultural activities are available at ALU?",
+      "answer": "The extracurricular landscape at ALU is vibrant and diverse. Cultural activities range from art exhibitions and music festivals to theater productions and international cultural fairs. In addition, ALU hosts social entrepreneurship contests, sustainability projects, and community service initiatives. Annual events, such as homecoming, leadership summits, and multicultural weeks, provide ample opportunities for student engagement and personal growth."
+    },
+    {
+      "id": "camp_012",
+      "type": "procedural_response",
+      "question": "How can students get involved in campus life?",
+      "answer": "Students can engage in campus life by:\n1. Joining various student clubs and organizations via the student portal or directly through the Student Life Office.\n2. Participating in campus events, workshops, and cultural programs.\n3. Volunteering for community service and extracurricular projects.\n4. Attending student government meetings and contributing to campus initiatives.\n5. Utilizing campus facilities such as study centers, athletics, and recreation areas to network with peers.",
+      "deadline": "Opportunities and event sign-ups are available year-round, with new initiatives announced each semester."
     }
   ]
 }

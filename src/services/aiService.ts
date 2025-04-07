@@ -1,6 +1,13 @@
-
 // This file contains the AI service that interacts with the backend
 import { Message } from "@/types/chat";
+
+// Example configuration in frontend:
+const API_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://your-backend-url.com'
+  : 'http://localhost:8000';
+
+// Update this to use /api/chat
+const CHAT_ENDPOINT = `${API_URL}/api/chat`;
 
 /**
  * Service for interacting with the AI backend
@@ -99,7 +106,7 @@ export const aiService = {
         content: message.text,
       }));
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/chat`, {
+      const response = await fetch(CHAT_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
