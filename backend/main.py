@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 
 # Import the modules
-from document_processor import DocumentProcessor
+from backend.document_processor import DocumentProcessor
 from retrieval_engine_extended import ExtendedRetrievalEngine
 from prompt_engine import PromptEngine
 from prompt_engine.nyptho_integration import NypthoIntegration
