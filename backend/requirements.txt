@@ -33,6 +33,5 @@ gunicorn==21.2.0
 
 # Enhanced capabilities - simplified
 sympy>=1.11.1
-duckduckgo-search>=3.8.3,<3.9.0
-wolframalpha==5.0.0
-# Removing transformers and spacy due to compatibility issues
+duckduckgo-search==7.5.5
+# Other dependencies as needed
