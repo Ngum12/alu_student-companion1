@@ -17,6 +17,6 @@ print(f"Backend directory exists: {backend_dir.exists()}")
 print(f"Files in backend: {os.listdir(backend_dir) if backend_dir.exists() else 'Directory not found'}")
 
 # Import the app from backend/main.py
-from main import app
+from backend.main import app
 
 # This file doesn't need any additional code - Render will import the 'app' variable

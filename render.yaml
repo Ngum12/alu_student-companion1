@@ -10,10 +10,6 @@ services:
     plan: free
     buildCommand: pip install -r backend/requirements.txt
     startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
-
-    buildCommand: pip install -r requirements.txt
-    startCommand: cd backend && gunicorn -k uvicorn.workers.UvicornWorker main:app
-
     envVars:
       - key: PORT
         value: 10000  # Required for Render's proxy
