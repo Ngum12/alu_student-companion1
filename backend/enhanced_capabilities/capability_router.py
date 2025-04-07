@@ -6,6 +6,22 @@ from .math_solver import is_math_question, solve_math_problem
 from .web_lookup import is_general_knowledge_question, search_web
 from .code_support import is_code_question, handle_code_question
 
+def format_math_solution(answer, steps):
+    """
+    Format the math solution with its steps for better display.
+    
+    Args:
+        answer: The final answer to the math problem
+        steps: List of steps taken to solve the problem
+        
+    Returns:
+        A formatted string with the solution and steps
+    """
+    result = f"Answer: {answer}\n\nSolution Steps:\n"
+    for i, step in enumerate(steps, 1):
+        result += f"{i}. {step}\n"
+    return result
+
 def is_school_related(question: str) -> bool:
     """
     Determine if a question is related to school/academic matters.
@@ -109,8 +125,10 @@ def handle_question(
     if is_math_question(question) and re.search(r'[0-9+\-*/^=]', question):
         try:
             answer, steps = solve_math_problem(question)
+            # Use the new formatter for better math display
+            response = format_math_solution(answer, steps)
             return {
-                "answer": answer,
+                "answer": response,
                 "source": "math_solver",
                 "additional_info": steps
             }

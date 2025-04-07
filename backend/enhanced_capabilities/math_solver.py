@@ -55,6 +55,236 @@ def is_math_question(question: str) -> bool:
                                  "*" in question_lower or "/" in question_lower or
                                  "=" in question_lower)
 
+def extract_math_expression(question: str) -> str:
+    """
+    Extract the mathematical expression from a text question.
+    Fixed to correctly handle expressions like "2x+4=0 find x"
+    """
+    # Clean up the question and remove extra whitespace
+    question = ' '.join(question.strip().split())
+    
+    # First check for equations with equals sign
+    has_equals = '=' in question
+    if has_equals:
+        # Extract the part of the string containing the equation
+        # This regex stops at common keywords that would follow an equation
+        equation_pattern = r'([^=]+=.+?)(?:\s+(?:find|solve|for|where|when)\b|$)'
+        equation_match = re.search(equation_pattern, question)
+        
+        if equation_match:
+            return equation_match.group(1).strip()
+    
+    # If no equation was found or extracted, try other methods
+    cleaned_question = question
+    
+    # Check for common instruction formats and strip them
+    instruction_patterns = [
+        r"^(find|solve|calculate|evaluate|compute)[\s\w]+:",
+        r"^(find|solve|calculate|evaluate|compute)[\s\w]+when",
+        r"^(find|solve|calculate|evaluate|compute)[\s\w]+if",
+        r"^(find|solve|calculate|evaluate|compute)[\s\w]+for[\s\w]+in",
+    ]
+    
+    for pattern in instruction_patterns:
+        match = re.match(pattern, question.lower())
+        if match:
+            cleaned_question = question[match.end():].strip()
+            break
+    
+    # Look for common words that indicate the end of a math expression
+    end_markers = ['find', 'solve', 'for', 'where', 'when']
+    for marker in end_markers:
+        marker_pattern = rf'\s+{marker}\s+'
+        if re.search(marker_pattern, cleaned_question.lower()):
+            # Split at the marker and take the part before it
+            parts = re.split(marker_pattern, cleaned_question.lower(), 1)
+            cleaned_question = parts[0].strip()
+            break
+    
+    # Additional check for end markers without spaces
+    if has_equals:  # Only apply this logic if we know there's an equals sign
+        for marker in end_markers:
+            if marker in cleaned_question.lower():
+                # Find the position where the marker starts
+                marker_pos = cleaned_question.lower().find(marker)
+                # Only process if marker is not at the start
+                if marker_pos > 0:
+                    # Check what's before the marker
+                    if cleaned_question[marker_pos-1] in " =+-*/^()0123456789":
+                        # This looks like a marker following an equation
+                        cleaned_question = cleaned_question[:marker_pos].strip()
+                        break
+    
+    # Look for equations in the cleaned question
+    equation_pattern = r'([0-9a-zA-Z\+\-\*\/\^\(\)\s=\.]+\=[0-9a-zA-Z\+\-\*\/\^\(\)\s\.]+)'
+    equation_match = re.search(equation_pattern, cleaned_question)
+    if equation_match:
+        return equation_match.group(1).strip()
+    
+    # If no equation found, look for any mathematical expression
+    expression_pattern = r'([0-9a-zA-Z\+\-\*\/\^\(\)\s\.]+)'
+    expr_match = re.search(expression_pattern, cleaned_question)
+    if expr_match:
+        return expr_match.group(1).strip()
+    
+    # If all else fails, return the cleaned question
+    return cleaned_question
+
+def preprocess_expression(expr_str: str) -> str:
+    """
+    Preprocess the expression to make it compatible with sympy.
+    """
+    if not expr_str:
+        return expr_str
+        
+    # Replace ^ with ** for exponentiation
+    expr_str = expr_str.replace('^', '**')
+    
+    # Handle implicit multiplication cases
+    # 2x → 2*x  (number followed by variable)
+    expr_str = re.sub(r'(\d)([a-zA-Z])', r'\1*\2', expr_str)
+    
+    # Handle coefficient next to parentheses: 2(x+1) → 2*(x+1)
+    expr_str = re.sub(r'(\d)(\()', r'\1*\2', expr_str)
+    
+    # Handle closing then opening parentheses: (x+1)(x+2) → (x+1)*(x+2)
+    expr_str = re.sub(r'(\))(\()', r'\1*\2', expr_str)
+    
+    # Handle variable next to parentheses: x(y+1) → x*(y+1)
+    expr_str = re.sub(r'([a-zA-Z])(\()', r'\1*\2', expr_str)
+    
+    # Remove any extra spaces to avoid parsing issues
+    expr_str = expr_str.replace(' ', '')
+    
+    return expr_str
+
+def extract_variable_to_solve(question: str) -> str:
+    """
+    Extract which variable to solve for from the question.
+    Returns the variable or empty string if none found.
+    """
+    # Common patterns for indicating variables to solve
+    patterns = [
+        r"solve\s+for\s+([a-zA-Z])", 
+        r"find\s+([a-zA-Z])",
+        r"calculate\s+([a-zA-Z])",
+        r"determine\s+([a-zA-Z])"
+    ]
+    
+    question_lower = question.lower()
+    
+    for pattern in patterns:
+        match = re.search(pattern, question_lower)
+        if match:
+            return match.group(1)
+    
+    # Default to 'x' if no specific variable mentioned
+    return 'x'
+
+def generate_solving_steps(math_expr: str, var, solutions) -> List[str]:
+    """
+    Generate detailed step-by-step explanations for solving an equation.
+    
+    Args:
+        math_expr: The original mathematical expression
+        var: The variable being solved for
+        solutions: The solutions found
+        
+    Returns:
+        List of steps as strings
+    """
+    steps = []
+    
+    # Add initial step showing the equation
+    steps.append(f"Starting with the equation: {math_expr}")
+    
+    # Generate detailed algebraic steps
+    if '=' in math_expr:
+        left, right = math_expr.split('=', 1)
+        left = left.strip()
+        right = right.strip()
+        
+        # Step 1: Move all terms to one side
+        steps.append(f"Step 1: Rearrange to get all terms on the left side")
+        steps.append(f"{left} - ({right}) = 0")
+        
+        try:
+            # Try to simplify and show the standard form
+            left_expr = sympy.sympify(preprocess_expression(left))
+            right_expr = sympy.sympify(preprocess_expression(right))
+            standard_form = left_expr - right_expr
+            
+            if var in str(standard_form):
+                # Only show if it's actually different from the previous step
+                if str(standard_form) != f"{left} - ({right})":
+                    steps.append(f"Step 2: Simplify the equation")
+                    steps.append(f"{standard_form} = 0")
+            
+                # Step 3: Isolate the variable
+                steps.append(f"Step 3: Isolate the variable {var}")
+                
+                # Handle linear equations in a special way for better explanations
+                if str(var) in str(standard_form) and "**" not in str(standard_form) and "/" + str(var) not in str(standard_form):
+                    # It's likely a linear equation, extract the coefficient
+                    try:
+                        # Get coefficient of x
+                        coef = sympy.Poly(standard_form, sympy.Symbol(str(var))).all_coeffs()[0]
+                        constant = -sympy.Poly(standard_form, sympy.Symbol(str(var))).all_coeffs()[1]
+                        
+                        # Show steps for linear equation
+                        steps.append(f"{coef}*{var} = {constant}")
+                        steps.append(f"{var} = {constant}/{coef}")
+                        
+                        # Simplify the result if possible
+                        simplified = sympy.simplify(constant / coef)
+                        if simplified != constant / coef:
+                            steps.append(f"{var} = {simplified}")
+                    except:
+                        # If the specific approach fails, use a generic message
+                        steps.append(f"Solving for {var}...")
+                else:
+                    # For non-linear equations, be more generic
+                    steps.append(f"Solving the equation for {var}...")
+        except Exception as e:
+            # If symbolic processing fails, fall back to generic steps
+            steps.append(f"Step 2: Solve for {var}")
+    else:
+        # For expressions without equals sign
+        steps.append(f"Setting the expression equal to zero: {math_expr} = 0")
+        steps.append(f"Solving for {var}...")
+    
+    # Add final solutions with verification
+    if len(solutions) == 1:
+        steps.append(f"Solution: {var} = {solutions[0]}")
+        
+        # Add verification step
+        try:
+            # Verify by substituting back into the original equation
+            if '=' in math_expr:
+                left, right = math_expr.split('=', 1)
+                left_expr = sympy.sympify(preprocess_expression(left))
+                right_expr = sympy.sympify(preprocess_expression(right))
+                
+                # Substitute the solution
+                left_result = left_expr.subs(sympy.Symbol(str(var)), solutions[0])
+                right_result = right_expr.subs(sympy.Symbol(str(var)), solutions[0])
+                
+                steps.append(f"Verification: Substitute {var} = {solutions[0]} back into the equation")
+                steps.append(f"Left side: {left} = {left_result}")
+                steps.append(f"Right side: {right} = {right_result}")
+                steps.append(f"Since {left_result} = {right_result}, the solution is correct.")
+        except:
+            pass  # Skip verification if it fails
+            
+    elif len(solutions) > 1:
+        steps.append(f"Multiple solutions found:")
+        for i, sol in enumerate(solutions, 1):
+            steps.append(f"Solution {i}: {var} = {sol}")
+    else:
+        steps.append("No solutions found.")
+    
+    return steps
+
 def solve_math_problem(question: str) -> Tuple[str, List[str]]:
     """
     Solve a math problem using symbolic computation.
@@ -68,18 +298,31 @@ def solve_math_problem(question: str) -> Tuple[str, List[str]]:
     # Clean up the question
     question = question.strip()
     
-    # Extract the actual equation or expression
-    math_expr = extract_math_expression(question)
-    
     try:
-        # Convert to sympy expression
-        expr = sympy.sympify(math_expr)
+        # Extract the actual equation or expression
+        math_expr = extract_math_expression(question)
+        print(f"Original question: '{question}'")
+        print(f"Extracted expression: '{math_expr}'")
+        
+        # Add safety check
+        if not math_expr or "find" in math_expr.lower() or "solve" in math_expr.lower():
+            # Failed to extract properly
+            print("Warning: Extraction may not have been clean")
+        
+        # Preprocess the expression (replace ^ with **, handle implicit multiplication)
+        processed_expr = preprocess_expression(math_expr)
+        print(f"Processed expression: '{processed_expr}'")
+        
+        # Safety check for invalid expressions
+        if "find" in processed_expr.lower() or "solve" in processed_expr.lower():
+            processed_expr = re.sub(r'(find|solve)[a-zA-Z]*', '', processed_expr, flags=re.IGNORECASE)
+            print(f"Fixed processed expression: '{processed_expr}'")
         
         # If it's an equation (contains =), solve it
-        if '=' in math_expr:
-            left, right = math_expr.split('=')
-            left = sympy.sympify(left)
-            right = sympy.sympify(right)
+        if '=' in processed_expr:
+            left, right = processed_expr.split('=', 1)
+            left = sympy.sympify(left.strip())
+            right = sympy.sympify(right.strip())
             
             # Move all terms to left side
             equation = left - right
@@ -89,242 +332,167 @@ def solve_math_problem(question: str) -> Tuple[str, List[str]]:
             if not variables:
                 return "No variables found to solve for.", []
             
-            # Solve for the first variable
+            # Solve for the first variable (usually x)
             var = variables[0]
             solutions = sympy.solve(equation, var)
             
             # Format the solution
-            result = f"{var} = {', '.join(map(str, solutions))}"
-            
-            # Generate steps
-            steps = generate_solving_steps(math_expr, var, solutions)
-            
-            return result, steps
+            if solutions:
+                result = f"{var} = {', '.join(map(str, solutions))}"
+                
+                # Generate steps
+                steps = generate_solving_steps(math_expr, var, solutions)
+                
+                return result, steps
+            else:
+                return "No solutions found. The equation may be inconsistent.", []
+                
         else:
-            # Just evaluate the expression
-            result = sympy.N(expr)
+            # Check for variables to determine if we need to solve something
+            try:
+                expr = sympy.sympify(processed_expr)
+                variables = list(expr.free_symbols)
+                
+                if variables:
+                    # There are variables but no '=' sign - assume it's set to 0
+                    var = variables[0] # Usually solve for x
+                    equation = expr
+                    solutions = sympy.solve(equation, var)
+                    
+                    if solutions:
+                        result = f"{var} = {', '.join(map(str, solutions))}"
+                        steps = [
+                            f"Interpreting the expression as an equation: {math_expr} = 0",
+                            f"Solving for {var}: {var} = {', '.join(map(str, solutions))}"
+                        ]
+                        return result, steps
+                    else:
+                        return "No solutions found when setting the expression to zero.", []
+                else:
+                    # Just evaluate the expression - no variables
+                    result = sympy.N(expr)
+                    steps = [f"Evaluating expression: {math_expr}", f"Result: {result}"]
+                    return f"Result: {result}", steps
             
-            # Generate steps
-            steps = [
-                f"Evaluating expression: {math_expr}",
-                f"Result: {result:.14f}"
-            ]
-            
-            return f"Result: {result:.14f}", steps
+            except Exception as e:
+                print(f"Error in expression evaluation: {str(e)}")
+                return f"Error evaluating expression: {str(e)}", [f"Failed to process: {processed_expr}", f"Error: {str(e)}"]
             
     except Exception as e:
-        return f"Error solving math problem: {str(e)}", []
+        print(f"Math solver error: {str(e)}")
+        return f"Error solving math problem: {str(e)}", [f"Failed to parse: {math_expr}", f"Error details: {str(e)}"]
 
-def extract_math_expression(question: str) -> str:
-    """Extract the mathematical expression from a text question."""
-    # Remove common phrases around math problems
-    phrases_to_remove = [
-        "solve", "calculate", "evaluate", "find", "compute",
-        "what is", "result of", "value of", "solve for"
-    ]
-    
-    cleaned = question.lower()
-    for phrase in phrases_to_remove:
-        cleaned = cleaned.replace(phrase, "")
-    
-    # Extract the expression using regex
-    expr_patterns = [
-        r"([\w\+\-\*\/\^\=\(\)\s\.]+)",  # General expression pattern
-        r"([a-zA-Z0-9\+\-\*\/\^\=\(\)\s\.]+)" # Another pattern
-    ]
-    
-    for pattern in expr_patterns:
-        match = re.search(pattern, cleaned)
-        if match:
-            expr = match.group(1).strip()
-            return expr
-    
-    # If no clear match, return the cleaned string
-    return cleaned.strip()
-
-def generate_solving_steps(equation: str, var, solutions) -> List[str]:
-    """Generate human-readable steps for solving an equation."""
-    steps = []
-    
-    # Start with the original equation
-    steps.append(f"Original equation: {equation}")
-    
-    # Rearranging to standard form
-    parts = equation.split("=")
-    if len(parts) == 2:
-        left, right = parts
-        steps.append(f"Rearranging to standard form: {left} - ({right}) = 0")
-    
-    # Show the solutions
-    steps.append(f"Solving for {var}: {var} = {', '.join(map(str, solutions))}")
-    
-    # Verification step
-    eq_with_solution = equation.replace(str(var), f"({solutions[0]})")
-    steps.append(f"Verification: Substituting {var} = {solutions[0]} into the original equation")
-    
-    return steps
-
-def preprocess_expression(expr_str: str) -> str:
+def debug_math_solver(question: str) -> Dict[str, Any]:
     """
-    Preprocess the expression string to make it compatible with sympy.
-    - Replace ^ with ** for exponentiation
-    - Handle implicit multiplication (e.g., 2x → 2*x)
+    Debug function to help diagnose issues with the math solver.
+    Returns detailed information about the parsing and solving process.
     """
-    # Replace ^ with ** for exponentiation
-    expr_str = expr_str.replace('^', '**')
+    result = {
+        "original_question": question,
+        "is_math_question": is_math_question(question),
+        "extracted_expression": extract_math_expression(question),
+        "variable_to_solve": extract_variable_to_solve(question),
+    }
     
-    # Handle implicit multiplication like 2x → 2*x
-    expr_str = re.sub(r'(\d)([a-zA-Z])', r'\1*\2', expr_str)
-    
-    return expr_str
-
-def identify_operation(question: str) -> str:
-    """Determine what mathematical operation is being requested."""
-    question = question.lower()
-    
-    if any(word in question for word in ["solve", "find", "determine"]):
-        if "equation" in question or "=" in question:
-            return "solve"
-    
-    if any(word in question for word in ["simplify", "reduce"]):
-        return "simplify"
-    
-    if any(word in question for word in ["expand", "distribute"]):
-        return "expand"
-    
-    if any(word in question for word in ["factor", "factorize"]):
-        return "factor"
-    
-    if any(word in question for word in ["integrate", "integral"]):
-        return "integrate"
-    
-    if any(word in question for word in ["derivative", "differentiate"]):
-        return "differentiate"
-    
-    # Default if no specific operation is identified
-    return "evaluate"
-
-def solve_math_with_sympy(question: str) -> Dict[str, Any]:
-    """
-    Use SymPy to solve mathematical questions.
-    
-    Args:
-        question: The mathematical question
-        
-    Returns:
-        Dict containing:
-            - answer: The solution as a string
-            - steps: List of steps taken to solve (if applicable)
-    """
     try:
-        # Extract the mathematical expression
-        expression_str = extract_math_expression(question)
-        if not expression_str:
-            return {
-                "answer": "I couldn't identify a clear mathematical expression in your question.",
-                "steps": []
-            }
+        # Process the expression
+        result["processed_expression"] = preprocess_expression(result["extracted_expression"])
         
-        # Identify what operation to perform
-        operation = identify_operation(question)
-        
-        # Define common variables used in algebra
-        x, y, z = symbols('x y z')
-        
-        steps = []
-        result = None
-        
-        # Preprocess the expression
-        expression_str = preprocess_expression(expression_str)
-        
-        # Handle different types of operations
-        if operation == "solve":
-            if "=" in expression_str:
-                try:
-                    left, right = expression_str.split("=")
-                    left = preprocess_expression(left.strip())
-                    right = preprocess_expression(right.strip())
-                    expr = sympy.parse_expr(left) - sympy.parse_expr(right)
-                    steps.append(f"Rearranging to standard form: {left} - ({right}) = 0")
-                except Exception as e:
-                    steps.append(f"Error parsing equation: {e}")
-                    expr = None
-            else:
-                try:
-                    expr = sympy.parse_expr(expression_str)
-                    steps.append(f"Treating expression as equal to zero: {expression_str} = 0")
-                except Exception as e:
-                    steps.append(f"Error parsing expression: {e}")
-                    expr = None
-            
-            if expr is not None:
-                result = solve(expr, x)
-                steps.append(f"Solving for x: {result}")
-            
-        elif operation == "simplify":
-            try:
-                expr = sympy.parse_expr(expression_str)
-                result = simplify(expr)
-                steps.append(f"Simplifying expression: {result}")
-            except Exception as e:
-                steps.append(f"Error simplifying expression: {e}")
-            
-        elif operation == "expand":
-            try:
-                expr = sympy.parse_expr(expression_str)
-                result = expand(expr)
-                steps.append(f"Expanding expression: {result}")
-            except Exception as e:
-                steps.append(f"Error expanding expression: {e}")
-            
-        elif operation == "factor":
-            try:
-                expr = sympy.parse_expr(expression_str)
-                result = factor(expr)
-                steps.append(f"Factoring expression: {result}")
-            except Exception as e:
-                steps.append(f"Error factoring expression: {e}")
-            
-        elif operation == "integrate":
-            try:
-                expr = sympy.parse_expr(expression_str)
-                result = integrate(expr, x)
-                steps.append(f"Integrating with respect to x: {result}")
-            except Exception as e:
-                steps.append(f"Error integrating expression: {e}")
-            
-        elif operation == "differentiate":
-            try:
-                expr = sympy.parse_expr(expression_str)
-                result = diff(expr, x)
-                steps.append(f"Taking derivative with respect to x: {result}")
-            except Exception as e:
-                steps.append(f"Error differentiating expression: {e}")
-            
-        else:  # evaluate
-            try:
-                expr = sympy.parse_expr(expression_str)
-                result = expr.evalf()
-                steps.append(f"Evaluating expression: {result}")
-            except Exception as e:
-                steps.append(f"Error evaluating expression: {e}")
-        
-        # Format the answer
-        if result is not None:
-            if isinstance(result, list):
-                answer = f"Solution: x = {', '.join(str(sol) for sol in result)}"
-            else:
-                answer = f"Result: {result}"
+        # Try to parse with sympy
+        if '=' in result["processed_expression"]:
+            left, right = result["processed_expression"].split('=', 1)
+            result["parsed_left"] = str(sympy.sympify(left))
+            result["parsed_right"] = str(sympy.sympify(right))
+            result["equation"] = str(sympy.sympify(left) - sympy.sympify(right))
         else:
-            answer = "I couldn't solve this problem."
+            result["parsed_expression"] = str(sympy.sympify(result["processed_expression"]))
         
-        return {
+        # Get full solution
+        answer, steps = solve_math_problem(question)
+        result["answer"] = answer
+        result["steps"] = steps
+        result["success"] = True
+        
+    except Exception as e:
+        result["error"] = str(e)
+        result["success"] = False
+        
+    return result
+
+# Test cases function to verify the solver works properly
+def run_test_cases():
+    """Run a series of test cases to verify the math solver works correctly."""
+    test_cases = [
+        "2x+4=0 find x",
+        "solve for x: 3x - 6 = 0", 
+        "what is 2 + 2?",
+        "find the value of x if 5x + 10 = 25",
+        "solve the equation 3y - 9 = 0",
+        "x^2 - 4 = 0",
+        "find the roots of x^2 - 5x + 6 = 0"
+    ]
+    
+    results = []
+    for case in test_cases:
+        answer, steps = solve_math_problem(case)
+        results.append({
+            "question": case,
             "answer": answer,
             "steps": steps
-        }
+        })
+        
+    return results
+
+# Add this function to your math_solver.py file
+def format_math_solution(answer: str, steps: List[str]) -> str:
+    """
+    Format the math solution in a clean, readable way with proper spacing and layout.
     
-    except Exception as e:
-        return {
-            "answer": f"I encountered an error while solving this math problem: {str(e)}",
-            "steps": []
-        }
+    Args:
+        answer: The final answer string
+        steps: List of solution steps
+        
+    Returns:
+        Properly formatted markdown string for display
+    """
+    # Format the main answer with bold styling and clear separation
+    formatted_solution = f"### {answer}\n\n"
+    
+    # Add a heading for the solution steps
+    formatted_solution += "**Solution Steps:**\n\n"
+    
+    # Format each step with proper spacing and numbering where appropriate
+    step_number = 1
+    for step in steps:
+        # Skip the initial repeat of the question
+        if step.startswith("Starting with"):
+            formatted_solution += f"1️⃣ {step}\n\n"
+            step_number = 2
+        # Format verification section specially
+        elif step.startswith("Verification"):
+            formatted_solution += f"\n**Verification:**\n"
+            formatted_solution += f"- {step.replace('Verification: ', '')}\n"
+        # Format left side/right side specially for alignment
+        elif step.startswith("Left side:"):
+            formatted_solution += f"- {step}\n"
+        elif step.startswith("Right side:"):
+            formatted_solution += f"- {step}\n"
+        elif step.startswith("Since"):
+            formatted_solution += f"- {step}\n\n"
+        # Format regular solution steps
+        elif step.startswith("Step"):
+            formatted_solution += f"{step_number}️⃣ {step.replace('Step ' + str(step_number-1) + ':', '')}\n\n"
+            step_number += 1
+        # Handle special cases for multiple solutions
+        elif step.startswith("Multiple solutions found"):
+            formatted_solution += f"\n**{step}**\n\n"
+        elif step.startswith("Solution "):
+            formatted_solution += f"- {step}\n"
+        # Format any mathematical expressions specially
+        elif "=" in step and not step.startswith("Result"):
+            formatted_solution += f"```\n{step}\n```\n\n"
+        # Default formatting for other steps
+        else:
+            formatted_solution += f"{step}\n\n"
+    
+    return formatted_solution
