@@ -33,5 +33,5 @@ gunicorn==21.2.0
 
 # Enhanced capabilities - simplified
 sympy>=1.11.1
-duckduckgo-search==7.5.5
+duckduckgo-search>=7.5.0
 # Other dependencies as needed
