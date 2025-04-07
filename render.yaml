@@ -12,6 +12,7 @@ services:
         value: production
       - key: OPENAI_API_KEY
         sync: false
+        required: false  # Make it optional
       - key: RENDER_EXTERNAL_URL
         fromService:
           type: web
