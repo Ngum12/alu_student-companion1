@@ -1,4 +1,3 @@
-
 import os
 import json
 import uvicorn
@@ -12,6 +11,7 @@ from document_processor import DocumentProcessor
 from retrieval_engine_extended import ExtendedRetrievalEngine
 from prompt_engine import PromptEngine
 from prompt_engine.nyptho_integration import NypthoIntegration
+from enhanced_capabilities.capability_router import handle_question, is_school_related
 
 # Create FastAPI app
 app = FastAPI(title="ALU Chatbot Backend")
@@ -19,7 +19,7 @@ app = FastAPI(title="ALU Chatbot Backend")
 # Add CORS middleware to allow frontend to access the API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Will accept connections from any origin
+    allow_origins=["http://192.168.42.127:8080", "http://localhost:8080", "http://localhost:3000", "*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -83,9 +83,49 @@ async def health():
         print(f"Health check error: {e}")
         raise HTTPException(status_code=500, detail="System health check failed")
 
-@app.post("/chat")
-async def chat(request: ChatRequest):
-    """Process a chat message and return a response"""
+@app.post("/api/chat")
+async def process_chat(request: ChatRequest):
+    user_message = request.message
+    
+    # First, check if this is a specialized query that should use enhanced capabilities
+    if not is_school_related(user_message):
+        try:
+            # Use the enhanced capabilities router
+            result = handle_question(
+                user_message,
+                search_school_docs_func=lambda q: retrieval_engine.search(q)
+            )
+            
+            # Format the response based on which capability handled it
+            if result["source"] == "math_solver":
+                steps = "\n".join(result["additional_info"]) if result["additional_info"] else ""
+                response = f"{result['answer']}\n\n{steps}"
+            
+            elif result["source"] == "web_search":
+                snippets = result["additional_info"]["snippets"][:2]  # Limit to first 2 snippets
+                links = result["additional_info"]["links"][:2]  # Limit to first 2 links
+                
+                sources = ""
+                for i, link in enumerate(links):
+                    sources += f"\n- [{link}]({link})"
+                
+                response = f"{result['answer']}\n\nSources:{sources}"
+                
+            elif result["source"] == "code_support":
+                # The code support module already formats a nice response
+                response = result["answer"]
+                
+            else:
+                response = result["answer"]
+                
+            return {"response": response}
+        
+        except Exception as e:
+            # Fall back to the existing document retrieval system if there's an error
+            print(f"Enhanced capabilities error: {e}")
+            # Continue to existing code...
+    
+    # Original document search functionality
     try:
         # Extract the user message
         query = request.message
@@ -298,6 +338,77 @@ async def get_search_stats():
     except Exception as e:
         print(f"Error getting search stats: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/chat")
+async def chat(request: ChatRequest):
+    user_message = request.message
+    
+    # First, check if this is a specialized query that should use enhanced capabilities
+    if not is_school_related(user_message):
+        try:
+            # Use the enhanced capabilities router
+            result = handle_question(
+                user_message,
+                search_school_docs_func=lambda q: retrieval_engine.retrieve_context(q)
+            )
+            
+            # Format the response based on which capability handled it
+            if result["source"] == "math_solver":
+                steps = "\n".join(result["additional_info"]) if result["additional_info"] else ""
+                response = f"{result['answer']}\n\n{steps}"
+            elif result["source"] == "web_search":
+                snippets = result["additional_info"]["snippets"][:2]  # Limit to first 2 snippets
+                links = result["additional_info"]["links"][:2]  # Limit to first 2 links
+                
+                sources = ""
+                for i, link in enumerate(links):
+                    sources += f"\n- [{link}]({link})"
+                
+                response = f"{result['answer']}\n\nSources:{sources}"
+            elif result["source"] == "code_support":
+                response = result["answer"]
+            else:
+                response = result["answer"]
+            
+            return {"response": response}
+        except Exception as e:
+            print(f"Enhanced capabilities error: {e}")
+    
+    # Fall back to original document retrieval
+    try:
+        # Get relevant context from the retrieval engine
+        context_docs = retrieval_engine.retrieve_context(
+            query=user_message,
+            role="student"  # Default role
+        )
+        
+        # Generate response using the prompt engine
+        response = prompt_engine.generate_response(
+            query=user_message,
+            context=context_docs,
+            conversation_history=[],
+            role="student",
+            options={}
+        )
+        
+        # Extract sources for attribution
+        sources = []
+        for doc in context_docs[:3]:  # Top 3 sources
+            if doc.metadata and 'source' in doc.metadata:
+                source = {
+                    'title': doc.metadata.get('title', 'ALU Knowledge Base'),
+                    'source': doc.metadata.get('source', 'ALU Brain')
+                }
+                if source not in sources:  # Avoid duplicates
+                    sources.append(source)
+        
+        return {
+            "response": response,
+            "sources": sources
+        }
+    except Exception as e:
+        print(f"Error in document retrieval fallback: {e}")
+        return {"response": "I'm sorry, I couldn't process your request due to a technical error."}
 
 # Run the server
 if __name__ == "__main__":

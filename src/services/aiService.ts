@@ -5,6 +5,14 @@ import { Message } from "@/types/chat";
 /**
  * Service for interacting with the AI backend
  */
+// Define a type for personality options
+type Personality = {
+  name?: string;
+  traits?: string[];
+  tone?: string;
+  [key: string]: unknown;
+};
+
 export const aiService = {
   // Cache for backend availability to reduce repeated checks
   _backendAvailableCache: {
@@ -19,7 +27,7 @@ export const aiService = {
   async generateResponse(
     query: string,
     conversationHistory: Message[] = [],
-    options: { personality?: any } = {}
+    options: { personality?: Personality } = {}
   ): Promise<string> {
     try {
       // Check if backend is available
@@ -68,21 +76,21 @@ export const aiService = {
     } catch (error) {
       console.error("Backend health check failed:", error);
       
-      // Update cache with failed status
+      // Update cache
       this._backendAvailableCache.status = false;
       this._backendAvailableCache.timestamp = now;
       
       return false;
     }
   },
-
+      
   /**
    * Gets a response from the backend
    */
   async getResponseFromBackend(
     query: string,
     conversationHistory: Message[],
-    options: { personality?: any } = {}
+    options: { personality?: Personality } = {}
   ): Promise<string> {
     try {
       // Convert the conversation history to the format expected by the backend
@@ -130,7 +138,7 @@ export const aiService = {
   /**
    * Gets the status of the Nyptho system
    */
-  async getNypthoStatus(): Promise<{ ready: boolean; learning: any }> {
+  async getNypthoStatus(): Promise<{ ready: boolean; learning: { observation_count: number; learning_rate: number } }> {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/nyptho/status`, {
         method: "GET",
