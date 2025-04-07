@@ -21,20 +21,25 @@ app = FastAPI(title="ALU Chatbot Backend")
 # Add CORS middleware to allow frontend to access the API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://192.168.42.127:8080", "http://localhost:8080", "http://localhost:3000", "*"],
+    allow_origins=os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(","),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Initialize components
-document_processor = DocumentProcessor()
-retrieval_engine = ExtendedRetrievalEngine()
-prompt_engine = PromptEngine()
-nyptho = NypthoIntegration()  # Initialize Nyptho
-conversation_memory = ConversationMemory(persistence_path="./data/conversations.json")
-# Try to load existing conversations
-conversation_memory.load_from_disk()
+# Replace the existing component initialization code with this
+try:
+    # Initialize components
+    document_processor = DocumentProcessor()
+    retrieval_engine = ExtendedRetrievalEngine()
+    prompt_engine = PromptEngine()
+    nyptho = NypthoIntegration()  # Initialize Nyptho
+    conversation_memory = ConversationMemory(persistence_path="./data/conversations.json")
+    # Try to load existing conversations
+    conversation_memory.load_from_disk()
+except Exception as e:
+    print(f"CRITICAL INIT ERROR: {e}")
+    raise SystemExit(1)  # Fail fast if core components fail
 
 # Define request models
 class ChatRequest(BaseModel):
@@ -351,6 +356,17 @@ async def get_search_stats():
     except Exception as e:
         print(f"Error getting search stats: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.on_event("shutdown")
+def shutdown_event():
+    """Handler for application shutdown"""
+    print("Saving conversation memory...")
+    conversation_memory.save_to_disk()
+    print("Shutting down Nyptho...")
+    try:
+        nyptho.shutdown()
+    except:
+        pass  # Ignore errors during shutdown
 
 # Run the server
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ Conversation memory module for storing and retrieving chat history
 from typing import List, Dict, Optional, Any
 import time
 import uuid
+import os
 
 class Message:
     """Represents a single message in a conversation."""
@@ -91,9 +92,12 @@ class Conversation:
 class ConversationMemory:
     """Memory system for storing and managing conversations."""
     def __init__(self, persistence_path: Optional[str] = None):
+        self.persistence_path = os.path.join(
+            os.getenv("RENDER_VOLUME_PATH", "./data"), 
+            os.path.basename(persistence_path)
+        )
         self.conversations: Dict[str, Conversation] = {}
         self.user_conversations: Dict[str, List[str]] = {}  # Maps user_ids to conversation_ids
-        self.persistence_path = persistence_path
     
     def create_conversation(self, user_id: str) -> Conversation:
         """Create a new conversation for a user."""

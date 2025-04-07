@@ -1,4 +1,3 @@
-# Blueprint name
 name: alu-student-companion
 
 services:
@@ -9,17 +8,15 @@ services:
     pythonVersion: 3.11
     region: ohio
     plan: free
-    buildCommand: pip install -r backend/requirements.txt
-    # IMPORTANT: Explicitly convert the PORT env var to match what uvicorn expects
-    startCommand: sh -c 'export PORT=${PORT:-8000} && uvicorn app:app --host 0.0.0.0 --port $PORT'
+    buildCommand: |
+      pip install -r requirements.txt
+      python -m nltk.downloader punkt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1
     envVars:
-      - key: PYTHONPATH
-        value: /opt/render/project/src
+      - key: PORT
+        value: 10000  # Required for Render's proxy
       - key: ENVIRONMENT
         value: production
-      - key: OPENAI_API_KEY
-        sync: false
-        required: false
       - key: CORS_ALLOWED_ORIGINS
         value: https://alu-companion.onrender.com
 
@@ -29,10 +26,12 @@ services:
     runtime: node
     region: ohio
     plan: free
-    buildCommand: npm install && npm run build
-    startCommand: npm run preview -- --host 0.0.0.0 --port $PORT
+    buildCommand: |
+      npm install
+      npm run build
+    startCommand: vite preview --host 0.0.0.0 --port $PORT
     envVars:
-      - key: NODE_ENV
-        value: production
-      - key: VITE_API_KEY
+      - key: PORT
+        value: 3000
+      - key: VITE_API_URL
         value: https://alu-companion-api.onrender.com
