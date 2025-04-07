@@ -29,17 +29,49 @@ app.add_middleware(
 
 # Replace the existing component initialization code with this
 try:
-    # Initialize components
-    document_processor = DocumentProcessor()
-    retrieval_engine = ExtendedRetrievalEngine()
-    prompt_engine = PromptEngine()
-    nyptho = NypthoIntegration()  # Initialize Nyptho
-    conversation_memory = ConversationMemory(persistence_path="./data/conversations.json")
-    # Try to load existing conversations
-    conversation_memory.load_from_disk()
+    # Initialize components one by one with explicit error handling
+    try:
+        document_processor = DocumentProcessor()
+        print("✅ DocumentProcessor initialized")
+    except Exception as e:
+        print(f"⚠️ DocumentProcessor init failed: {e}")
+        document_processor = None
+        
+    try:
+        retrieval_engine = ExtendedRetrievalEngine()
+        print("✅ ExtendedRetrievalEngine initialized")
+    except Exception as e:
+        print(f"⚠️ ExtendedRetrievalEngine init failed: {e}")
+        retrieval_engine = None
+        
+    try:
+        prompt_engine = PromptEngine()
+        print("✅ PromptEngine initialized")
+    except Exception as e:
+        print(f"⚠️ PromptEngine init failed: {e}")
+        prompt_engine = None
+        
+    try:
+        nyptho = NypthoIntegration()
+        print("✅ NypthoIntegration initialized")
+    except Exception as e:
+        print(f"⚠️ NypthoIntegration init failed: {e}")
+        nyptho = None
+        
+    # Create data directory if it doesn't exist
+    os.makedirs("./data", exist_ok=True)
+    
+    try:
+        conversation_memory = ConversationMemory(persistence_path="./data/conversations.json")
+        conversation_memory.load_from_disk()
+        print("✅ ConversationMemory initialized and loaded")
+    except Exception as e:
+        print(f"⚠️ ConversationMemory init failed: {e}")
+        conversation_memory = None
+        
 except Exception as e:
-    print(f"CRITICAL INIT ERROR: {e}")
-    raise SystemExit(1)  # Fail fast if core components fail
+    print(f"⚠️ CRITICAL INIT ERROR: {e}")
+    # Don't exit - provide minimal functionality instead
 
 # Define request models
 class ChatRequest(BaseModel):

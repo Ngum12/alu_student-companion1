@@ -8,14 +8,13 @@ services:
     pythonVersion: 3.11
     region: ohio
     plan: free
-    buildCommand: |
-      pip install -r requirements.txt
-      python -m nltk.downloader punkt
-    # In render.yaml (API service)
-    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1 --timeout-keep-alive 30
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PORT
         value: 10000  # Required for Render's proxy
+      - key: PYTHONPATH
+        value: /opt/render/project/src
       - key: ENVIRONMENT
         value: production
       - key: CORS_ALLOWED_ORIGINS
@@ -30,9 +29,11 @@ services:
     buildCommand: |
       npm install
       npm run build
-    startCommand: vite preview --host 0.0.0.0 --port $PORT
+    startCommand: npm run preview -- --host 0.0.0.0 --port $PORT
     envVars:
       - key: PORT
         value: 3000
+      - key: NODE_ENV
+        value: production
       - key: VITE_API_URL
         value: https://alu-companion-api.onrender.com
