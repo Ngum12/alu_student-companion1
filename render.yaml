@@ -1,0 +1,38 @@
+services:
+  # Backend service
+  - type: web
+    name: alu-companion-api
+    runtime: python
+    region: ohio
+    plan: free
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: RENDER_EXTERNAL_URL
+        fromService:
+          type: web
+          name: alu-companion-api
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://alu-companion.onrender.com
+
+  # Frontend service
+  - type: web
+    name: alu-companion
+    runtime: node
+    region: ohio
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build
+    startCommand: cd frontend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: alu-companion-api
+          envVarKey: RENDER_EXTERNAL_URL

@@ -17,10 +17,56 @@ def format_math_solution(answer, steps):
     Returns:
         A formatted string with the solution and steps
     """
-    result = f"Answer: {answer}\n\nSolution Steps:\n"
-    for i, step in enumerate(steps, 1):
-        result += f"{i}. {step}\n"
-    return result
+    # Format the main answer with bold styling and clear separation
+    formatted_solution = f"### {answer}\n\n"
+    
+    # Add a heading for the solution steps
+    formatted_solution += "**Solution Steps:**\n\n"
+    
+    # Format each step with proper spacing and numbering where appropriate
+    step_number = 1
+    for step in steps:
+        # Skip the initial repeat of the question
+        if step.startswith("Starting with"):
+            formatted_solution += f"1️⃣ {step}\n\n"
+            step_number = 2
+            continue
+            
+        # Format verification section specially
+        if step.startswith("Verification"):
+            formatted_solution += f"\n**Verification:**\n"
+            formatted_solution += f"- {step.replace('Verification: ', '')}\n"
+            continue
+            
+        # Format left side/right side specially for alignment
+        if step.startswith("Left side:"):
+            formatted_solution += f"- {step}\n"
+            continue
+            
+        if step.startswith("Right side:"):
+            formatted_solution += f"- {step}\n"
+            continue
+            
+        if step.startswith("Since"):
+            formatted_solution += f"- {step}\n\n"
+            continue
+            
+        # Format equations in code blocks for better readability
+        if "=" in step and not step.startswith("Solution") and not step.startswith("Step"):
+            formatted_solution += f"```\n{step}\n```\n\n"
+            continue
+            
+        # Format regular solution steps
+        if step.startswith("Step"):
+            number_emoji = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"][step_number-1] if step_number <= 10 else f"{step_number}."
+            formatted_solution += f"{number_emoji} {step.replace('Step ' + str(step_number-1) + ':', '')}\n\n"
+            step_number += 1
+            continue
+            
+        # Default formatting for other steps
+        formatted_solution += f"{step}\n\n"
+    
+    return formatted_solution
 
 def is_school_related(question: str) -> bool:
     """
