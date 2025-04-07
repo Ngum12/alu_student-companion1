@@ -1,0 +1,92 @@
+
+{
+  "category": "financial_information",
+  "description": "Information about tuition, fees, payment plans, and financial aid",
+  "entries": [
+    {
+      "id": "fin_001",
+      "type": "table_response",
+      "question": "What are the tuition fees?",
+      "answer": "ALU tuition fees vary by campus and program:",
+      "table": {
+        "headers": ["Campus", "Program", "Annual Tuition (USD)"],
+        "rows": [
+          ["Rwanda", "Computer Science", "$12,000"],
+          ["Rwanda", "Global Challenges", "$12,000"],
+          ["Rwanda", "Business Management", "$12,000"],
+          ["Mauritius", "Computer Science", "$15,000"],
+          ["Mauritius", "Global Challenges", "$15,000"],
+          ["Mauritius", "International Business & Trade", "$15,000"]
+        ]
+      },
+      "note": "Additional fees for housing, meals, and student services may apply. Scholarships may significantly reduce these costs."
+    },
+    {
+      "id": "fin_002",
+      "type": "short_response",
+      "question": "When are tuition payments due?",
+      "answer": "Tuition payments are due at the beginning of each term. Fall term payments are due by August 15, and Spring term payments are due by January 15."
+    },
+    {
+      "id": "fin_003",
+      "type": "procedural_response",
+      "question": "How do I set up a payment plan?",
+      "answer": "To set up a tuition payment plan at ALU:\n1. Contact the Finance Office at finance@alueducation.com\n2. Request the payment plan application form\n3. Complete the form with your preferred payment schedule\n4. Submit the form along with the first installment payment\n5. Await approval confirmation (usually within 5 business days)\n6. Follow the approved payment schedule for remaining installments",
+      "contact": "For questions about payment plans, contact the Finance Office at +250 788 123 456"
+    },
+    {
+      "id": "fin_004",
+      "type": "link_response",
+      "question": "What financial aid options are available?",
+      "answer": "ALU offers various financial aid options including:",
+      "links": [
+        {
+          "text": "ALU Scholarship Portal",
+          "url": "https://scholarships.alueducation.com"
+        },
+        {
+          "text": "External Funding Opportunities",
+          "url": "https://funding.alueducation.com/external"
+        },
+        {
+          "text": "Student Loan Partnerships",
+          "url": "https://finance.alueducation.com/loans"
+        }
+      ]
+    },
+    {
+      "id": "fin_005",
+      "type": "statistical_response",
+      "question": "What are the average costs beyond tuition?",
+      "answer": "Students should budget for these additional costs beyond tuition:",
+      "statistics": [
+        {
+          "metric": "Housing (on-campus, annual average)",
+          "value": "$3,200"
+        },
+        {
+          "metric": "Meal Plan (annual average)",
+          "value": "$2,800"
+        },
+        {
+          "metric": "Books and Supplies (annual estimate)",
+          "value": "$1,200"
+        },
+        {
+          "metric": "Student Services Fee (per year)",
+          "value": "$950"
+        },
+        {
+          "metric": "Health Insurance (annual, if not covered elsewhere)",
+          "value": "$1,500"
+        }
+      ]
+    },
+    {
+      "id": "fin_006",
+      "type": "long_response",
+      "question": "What happens if I can't pay my tuition on time?",
+      "answer": "If you're unable to make your tuition payment by the deadline, ALU has a structured process to address financial difficulties:\n\n1. **Early Communication**: Contact the Finance Office as soon as you anticipate payment issues. Early communication can prevent late fees and registration holds.\n\n2. **Grace Period**: A 14-day grace period applies after the payment deadline during which no late fees are assessed.\n\n3. **Late Payment Fee**: After the grace period, a 5% late fee is applied to the outstanding balance.\n\n4. **Payment Plan Modification**: Students with existing payment plans may request a one-time modification per academic year without penalty.\n\n5. **Emergency Financial Assistance**: The university maintains a limited emergency fund for students facing unexpected financial hardship. Applications are reviewed on a case-by-case basis.\n\n6. **Academic Hold**: If payment is not received within 30 days of the due date, an academic hold may be placed on your account, preventing registration for future courses and access to official transcripts.\n\n7. **Installment Options**: In cases of financial difficulty, the Finance Office may approve breaking a single payment into smaller installments over a short period.\n\nThe university is committed to working with students facing genuine financial difficulties, but it's essential to be proactive and communicate with the Finance Office before missing payment deadlines."
+    }
+  ]
+}

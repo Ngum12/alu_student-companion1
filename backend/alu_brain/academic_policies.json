@@ -1,0 +1,63 @@
+
+{
+  "category": "academic_policies",
+  "description": "Information about grading, attendance, academic integrity, and graduation requirements",
+  "entries": [
+    {
+      "id": "pol_001",
+      "type": "table_response",
+      "question": "What is the grading scale?",
+      "answer": "ALU uses the following grading scale for all courses:",
+      "table": {
+        "headers": ["Grade", "Percentage", "GPA Value"],
+        "rows": [
+          ["A", "93-100%", "4.0"],
+          ["A-", "90-92%", "3.7"],
+          ["B+", "87-89%", "3.3"],
+          ["B", "83-86%", "3.0"],
+          ["B-", "80-82%", "2.7"],
+          ["C+", "77-79%", "2.3"],
+          ["C", "73-76%", "2.0"],
+          ["C-", "70-72%", "1.7"],
+          ["D+", "67-69%", "1.3"],
+          ["D", "63-66%", "1.0"],
+          ["D-", "60-62%", "0.7"],
+          ["F", "0-59%", "0.0"]
+        ]
+      }
+    },
+    {
+      "id": "pol_002",
+      "type": "factual_response",
+      "question": "What is the academic integrity policy?",
+      "answer": "ALU maintains a strict academic integrity policy. Violations include plagiarism, cheating, unauthorized collaboration, fabrication of information, and helping others violate the policy. First violations typically result in an educational intervention and possible grade penalty. Second violations may result in course failure, and third violations can lead to suspension or expulsion. All violations are recorded in the student's file.",
+      "link": "The full academic integrity policy is available in the Student Handbook."
+    },
+    {
+      "id": "pol_003",
+      "type": "short_response",
+      "question": "Can I take courses pass/fail?",
+      "answer": "Yes, students may take up to two courses per academic year on a pass/fail basis. However, courses in your major, minor, or core requirements cannot be taken pass/fail. The decision to switch to pass/fail grading must be made by the end of the fourth week of classes."
+    },
+    {
+      "id": "pol_004",
+      "type": "long_response",
+      "question": "What are the attendance policies?",
+      "answer": "ALU's attendance policy emphasizes consistent participation while providing reasonable flexibility for legitimate absences. The specific attendance requirements are as follows:\n\n**General Policy**\nStudents are expected to attend all scheduled class sessions, whether in-person or online. Regular attendance is strongly correlated with academic success and is considered essential for the collaborative learning environment ALU fosters.\n\n**Excused Absences**\nExcused absences include:\n- Documented medical illness or emergency (requires healthcare provider documentation)\n- Religious observances (must be communicated to instructors in first week of class)\n- University-sponsored activities like athletic competitions or academic conferences (requires official documentation)\n- Family emergencies (requires dean's office notification)\n\n**Absence Limits**\nFor most courses, students are permitted:\n- For courses meeting 1-2 times per week: Maximum of 2 unexcused absences\n- For courses meeting 3 or more times per week: Maximum of 4 unexcused absences\n\nExceeding these limits may result in course grade penalties or course failure, at the instructor's discretion as specified in the syllabus.\n\n**Reporting Absences**\nStudents must notify instructors before class whenever possible, and submit any required documentation within 3 days of returning to class.\n\n**Make-up Work**\nStudents with excused absences are responsible for arranging to make up missed work directly with instructors. The format and deadline for make-up work is at the instructor's discretion but must provide a reasonable opportunity for students to demonstrate mastery.\n\n**Extended Absences**\nAbsences extending beyond one week require notification of the Dean of Students office, which will coordinate with instructors across all courses."
+    },
+    {
+      "id": "pol_005",
+      "type": "procedural_response",
+      "question": "How do I appeal a grade?",
+      "answer": "To appeal a grade at ALU:\n1. First discuss the grade with your course instructor within 7 days of receiving it\n2. If unresolved, submit a formal Grade Appeal Form to the department chair\n3. Include supporting evidence and clear rationale for the appeal\n4. The department chair will review and possibly consult with the instructor\n5. If still unresolved, the appeal escalates to the Academic Standards Committee\n6. Attend the appeal hearing if requested to present your case\n7. Receive the committee's final decision within 14 days of the hearing",
+      "deadline": "All grade appeals must be initiated within 14 days of grade posting"
+    },
+    {
+      "id": "pol_006",
+      "type": "factual_response",
+      "question": "What are the graduation requirements?",
+      "answer": "To graduate from ALU, students must: complete 120 credit hours, maintain a cumulative GPA of 2.0 or higher, complete all major and core curriculum requirements, complete at least one internship or practical experience, fulfill the leadership capstone project, and have no outstanding financial obligations to the university.",
+      "additional": "All students must submit a graduation application by the posted deadline, typically one term before intended graduation."
+    }
+  ]
+}

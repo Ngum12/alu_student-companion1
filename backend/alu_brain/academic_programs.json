@@ -1,0 +1,84 @@
+
+{
+  "category": "academic_programs",
+  "description": "Information about ALU's academic programs, degrees, and curriculum",
+  "entries": [
+    {
+      "id": "prog_001",
+      "type": "short_response",
+      "question": "What degrees does ALU offer?",
+      "answer": "ALU offers Bachelor of Science degrees in various disciplines including Computer Science, Global Challenges, Business Management, and International Business & Trade."
+    },
+    {
+      "id": "prog_002",
+      "type": "long_response",
+      "question": "How is ALU's curriculum structured?",
+      "answer": "ALU's curriculum is structured around a leadership core that all students take regardless of their degree program. This core focuses on developing entrepreneurial leadership skills, critical thinking, and communication abilities. Beyond the core, students specialize in their chosen field through major-specific courses.\n\nThe curriculum follows a four-year structure with increasing specialization each year. First-year students focus on foundational skills and the leadership core. Second-year introduces more specialized courses in their chosen field. Third and fourth years combine deep disciplinary knowledge with practical projects, internships, and a final capstone project that demonstrates their learning and impact.\n\nUnlike traditional universities, ALU emphasizes practical, project-based learning over theoretical lectures. Students work on real-world challenges, often in collaboration with industry partners and communities."
+    },
+    {
+      "id": "prog_003",
+      "type": "link_response",
+      "question": "Where can I find the course catalog?",
+      "answer": "You can find ALU's full course catalog on the official website",
+      "links": [
+        {
+          "text": "ALU Course Catalog",
+          "url": "https://www.alueducation.com/programs/course-catalog"
+        },
+        {
+          "text": "Degree Requirements",
+          "url": "https://www.alueducation.com/programs/degree-requirements"
+        }
+      ]
+    },
+    {
+      "id": "prog_004",
+      "type": "table_response",
+      "question": "What are the core courses required for all ALU students?",
+      "answer": "Regardless of major, all ALU students must complete these leadership core courses:",
+      "table": {
+        "headers": ["Course Code", "Course Title", "Credits", "Recommended Year"],
+        "rows": [
+          ["LEAD101", "Leadership & Communication", "3", "Year 1"],
+          ["LEAD102", "Entrepreneurial Leadership", "3", "Year 1"],
+          ["LEAD201", "Design Thinking & Problem Solving", "4", "Year 2"],
+          ["LEAD202", "Networks & Systems Thinking", "3", "Year 2"],
+          ["LEAD301", "African Challenge Solutions", "4", "Year 3"],
+          ["LEAD401", "Leadership Capstone Project", "6", "Year 4"]
+        ]
+      }
+    },
+    {
+      "id": "prog_005",
+      "type": "procedural_response",
+      "question": "How do I declare a major?",
+      "answer": "To declare your major at ALU:\n1. Complete all required foundation courses (typically by end of first year)\n2. Attend the Major Declaration Information Session\n3. Schedule an advising appointment with an academic advisor\n4. Complete the Major Declaration Form online through your student portal\n5. Submit any supplementary materials required by specific programs\n6. Receive confirmation of major acceptance (usually within 2 weeks)\n7. Meet with your assigned department advisor to plan your course schedule",
+      "deadline": "Major declarations must be completed by the end of your second term of sophomore year"
+    },
+    {
+      "id": "prog_006",
+      "type": "statistical_response",
+      "question": "How are students distributed across majors?",
+      "answer": "Current enrollment distribution across ALU's major programs:",
+      "statistics": [
+        {
+          "metric": "Computer Science",
+          "value": "32%"
+        },
+        {
+          "metric": "Global Challenges",
+          "value": "28%"
+        },
+        {
+          "metric": "Business Management",
+          "value": "24%"
+        },
+        {
+          "metric": "International Business & Trade",
+          "value": "16%"
+        }
+      ],
+      "note": "These percentages represent the current academic year and may change annually based on enrollment patterns."
+    }
+  ]
+}
