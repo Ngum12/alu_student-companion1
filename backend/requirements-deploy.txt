@@ -1,9 +1,21 @@
-fastapi
-uvicorn
-pydantic
-python-dotenv
-# Include only necessary ML dependencies with specific versions
-transformers==4.36.0
-torch==2.0.1+cpu
-sentence-transformers==2.2.2
-# Other required packages
+# Core only
+fastapi==0.104.1
+uvicorn==0.23.2
+pydantic>=2.4.0
+python-multipart
+python-dotenv>=1.0.0
+
+# Minimal vector DB and embeddings 
+chromadb==0.4.22
+sentence-transformers
+
+# Document processing (only what you use)
+pypdf==3.17.1
+markdown==3.5.1
+
+# HTTP
+requests>=2.28.2
+aiohttp>=3.8.4
+
+# Minimal ML
+torch==2.0.0+cpu --index-url https://download.pytorch.org/whl/cpu

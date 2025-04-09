@@ -7,7 +7,6 @@ python-multipart==0.0.6
 # Vector database and embeddings
 chromadb==0.4.22
 sentence-transformers==2.2.2
-huggingface_hub==0.16.4  # Adding compatible version
 torch>=2.0.0
 
 # PDF and document processing
@@ -16,9 +15,6 @@ docx2txt==0.8
 langchain>=0.0.200
 langchain_community==0.0.10
 
-# LLM integrations
-langchain_openai==0.0.2
-openai>=0.27.4
 
 # Utilities
 python-dotenv>=1.0.0
