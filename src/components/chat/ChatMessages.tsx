@@ -3,6 +3,7 @@ import { Message } from "@/types/chat";
 import { ChatMessage } from "../ChatMessage";
 import { Loader, Bot, Stars } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { atomDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
 interface ChatMessagesProps {
   messages: Message[];
