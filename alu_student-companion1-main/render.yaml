@@ -1,0 +1,39 @@
+name: alu-student-companion
+
+services:
+  # Backend service
+  - type: web
+    name: alu-companion-api
+    runtime: python
+    pythonVersion: 3.11
+    region: ohio
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PORT
+        value: 10000  # Required for Render's proxy
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+      - key: ENVIRONMENT
+        value: production
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://alu-companion.onrender.com
+
+  # Frontend service
+  - type: web
+    name: alu-companion
+    runtime: node
+    region: ohio
+    plan: free
+    buildCommand: |
+      npm install
+      npm run build
+    startCommand: bash start.sh
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: NODE_ENV
+        value: production
+      - key: VITE_API_URL
+        value: https://alu-companion-api.onrender.com
