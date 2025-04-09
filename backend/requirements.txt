@@ -8,7 +8,7 @@ python-multipart==0.0.6
 chromadb==0.4.22
 sentence-transformers==2.2.2
 torch>=2.0.0
-
+huggingface_hub==0.16.4  # Adding compatible version
 # PDF and document processing
 pypdf==3.17.1
 docx2txt==0.8

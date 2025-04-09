@@ -8,7 +8,7 @@ python-dotenv>=1.0.0
 # Minimal vector DB and embeddings 
 chromadb==0.4.22
 sentence-transformers
-
+huggingface_hub==0.16.4  # Adding compatible version
 # Document processing (only what you use)
 pypdf==3.17.1
 markdown==3.5.1
