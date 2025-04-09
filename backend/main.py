@@ -31,6 +31,10 @@ app.add_middleware(
         # For Hugging Face Spaces - add your specific URLs when you know them
         # "https://your-huggingface-space-name.hf.space",
         "*",  # Allow all origins for development
+
+        "http://localhost:8080",  # Add this line for your current frontend URL
+        "http://127.0.0.1:8080",  # Also add this alternative URL
+
     ],
     allow_credentials=True,
     allow_methods=["*"],
