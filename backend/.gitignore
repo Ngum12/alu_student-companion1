@@ -1,32 +1,25 @@
-
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
+.env
+.venv
 env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
+venv/
+compat_venv/
 
 # Virtual Environment
-venv/
 ENV/
 
 # Data Directory
 data/
+/data/
+/vector_index/
+*.bin
+*.pt
+*.pth
+*.onnx
+*.safetensors
 
 # Database
 *.db
@@ -48,3 +41,9 @@ Thumbs.db
 
 # Environment variables
 .env
+
+# Node
+node_modules/
+dist/
+build/
+.DS_Store

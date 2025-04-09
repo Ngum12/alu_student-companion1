@@ -1,13 +1,14 @@
 # Core dependencies
-fastapi>=0.95.0
-uvicorn>=0.21.1
-pydantic>=1.10.7
+fastapi==0.104.1
+uvicorn==0.23.2
+pydantic==2.4.2
 python-multipart==0.0.6
 
 # Vector database and embeddings
 chromadb==0.4.22
 sentence-transformers==2.2.2
 huggingface_hub==0.16.4  # Adding compatible version
+torch>=2.0.0
 
 # PDF and document processing
 pypdf==3.17.1

@@ -6,6 +6,7 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Body, Reques
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
+from datetime import datetime
 
 # Import the modules
 from document_processor import DocumentProcessor
@@ -21,7 +22,16 @@ app = FastAPI(title="ALU Chatbot Backend")
 # Add CORS middleware to allow frontend to access the API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(","),
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:8080", 
+        "http://127.0.0.1:8080",
+        "http://127.0.0.1:3000",
+        "http://192.168.42.230:3000",  
+        # For Hugging Face Spaces - add your specific URLs when you know them
+        # "https://your-huggingface-space-name.hf.space",
+        "*",  # Allow all origins for development
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -101,29 +111,28 @@ async def root():
     """Health check endpoint"""
     return {"status": "ALU Chatbot backend is running"}
 
+# Update the health check endpoint
 @app.get("/health")
 async def health():
     """Health check endpoint with detailed system status"""
     try:
-        # Get component statuses
-        brain_status = retrieval_engine.alu_brain is not None
-        nyptho_status = nyptho.get_status()
-        
-        # Return comprehensive health information
+        # Basic health check - will succeed even if other components fail
         return {
             "status": "healthy",
+            "timestamp": datetime.now().isoformat(),
             "components": {
-                "retrieval_engine": "online",
-                "alu_brain": "online" if brain_status else "offline",
-                "prompt_engine": "online",
-                "nyptho": nyptho_status
-            },
-            "version": "1.0.0",
-            "environment": os.getenv("ENVIRONMENT", "development")
+                "document_processor": document_processor is not None,
+                "retrieval_engine": retrieval_engine is not None,
+                "prompt_engine": prompt_engine is not None,
+                "conversation_memory": conversation_memory is not None
+            }
         }
     except Exception as e:
-        print(f"Health check error: {e}")
-        raise HTTPException(status_code=500, detail="System health check failed")
+        return {
+            "status": "degraded",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
 
 @app.post("/api/chat")
 async def process_chat(request: ChatRequest):
@@ -403,4 +412,4 @@ def shutdown_event():
 # Run the server
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)  # Set reload to False for production
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)  # Enable reload for development

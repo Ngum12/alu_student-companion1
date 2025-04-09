@@ -1,12 +1,12 @@
 # Core dependencies
-fastapi>=0.95.0
-uvicorn>=0.21.1
-pydantic>=1.10.7
-python-multipart==0.0.6
+fastapi==0.104.1
+uvicorn==0.23.2
+pydantic>=2.4.0
+python-multipart
 
 # Vector database and embeddings
 chromadb==0.4.22
-sentence-transformers==2.2.2
+sentence-transformers
 huggingface_hub==0.16.4  # Adding compatible version
 
 # PDF and document processing
@@ -37,4 +37,6 @@ duckduckgo-search>=7.5.0
 
 # Additional dependencies
 nltk>=3.8.1
-# Other dependencies as needed
+
+# Specify smaller torch version to reduce size
+torch==2.0.0 --index-url https://download.pytorch.org/whl/cpu

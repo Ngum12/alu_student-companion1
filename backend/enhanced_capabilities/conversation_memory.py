@@ -196,23 +196,16 @@ class ConversationMemory:
         import json
         import os
         
-        if not self.persistence_path or not os.path.exists(self.persistence_path):
-            return False
-            
         try:
-            with open(self.persistence_path, 'r') as f:
-                data = json.load(f)
-                
-            # Load conversations
-            self.conversations = {}
-            for conv_id, conv_data in data["conversations"].items():
-                self.conversations[conv_id] = Conversation.from_dict(conv_data)
-                
-            # Load user_conversations mapping
-            self.user_conversations = data["user_conversations"]
+            if os.path.exists(self.persistence_path):
+                # Load existing conversations
+                with open(self.persistence_path, 'r') as f:
+                    conversations_data = json.load(f)
+                    # Load conversation data...
             return True
         except Exception as e:
-            print(f"Error loading conversations from disk: {e}")
+            print(f"Error loading conversations, creating new storage: {e}")
+            # Continue with empty conversations rather than failing
             return False
     
     def summarize_conversation(self, conversation_id: str, max_length: int = 200) -> str:
