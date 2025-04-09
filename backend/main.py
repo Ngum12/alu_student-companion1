@@ -21,7 +21,11 @@ app = FastAPI(title="ALU Chatbot Backend")
 # Add CORS middleware to allow frontend to access the API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(","),
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:8080",  # Add this line for your current frontend URL
+        "http://127.0.0.1:8080",  # Also add this alternative URL
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

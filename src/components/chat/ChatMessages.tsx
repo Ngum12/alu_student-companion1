@@ -83,7 +83,7 @@ export const ChatMessages = ({ messages, isLoading, onEditMessage, activeModel =
                 <span className="text-sm text-gray-400">
                   {activeModel === 'deepseek' ? 
                     'DeepSeek AI is generating a response...' : 
-                    'Gemini AI is thinking...'}
+                    'ALU_SC AI is thinking...'}
                 </span>
               </div>
             </div>

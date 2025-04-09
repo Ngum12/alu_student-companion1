@@ -2,9 +2,7 @@
 import { Message } from "@/types/chat";
 
 // Example configuration in frontend:
-const API_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://your-backend-url.com'
-  : 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 // Update this to use /api/chat
 const CHAT_ENDPOINT = `${API_URL}/api/chat`;
@@ -65,7 +63,7 @@ export const aiService = {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/health`, {
+      const response = await fetch(`${API_URL}/health`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -145,9 +143,15 @@ export const aiService = {
   /**
    * Gets the status of the Nyptho system
    */
-  async getNypthoStatus(): Promise<{ ready: boolean; learning: { observation_count: number; learning_rate: number } }> {
+  async getNypthoStatus(): Promise<{
+    ready: boolean;
+    learning: {
+      observation_count: number;
+      learning_rate: number;
+    };
+  }> {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/nyptho/status`, {
+      const response = await fetch(`${API_URL}/nyptho/status`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
