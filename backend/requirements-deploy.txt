@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+# Include only necessary ML dependencies with specific versions
+transformers==4.36.0
+torch==2.0.1+cpu
+sentence-transformers==2.2.2
+# Other required packages

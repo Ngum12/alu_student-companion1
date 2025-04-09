@@ -7,6 +7,25 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from datetime import datetime
+import gc
+import torch
+import time
+
+# Set environment variables to reduce memory usage
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["TRANSFORMERS_CACHE"] = "/tmp/transformers_cache"
+
+# Force CPU usage and single thread
+if torch.cuda.is_available():
+    torch.cuda.empty_cache()
+torch.set_num_threads(1)
+
+# Add a memory cleanup function
+def cleanup_memory():
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
 
 # Import the modules
 from document_processor import DocumentProcessor
@@ -189,6 +208,7 @@ async def process_chat(request: ChatRequest):
                 if random.random() < 0.1:  # 10% chance to save after each message
                     conversation_memory.save_to_disk()
                 
+                cleanup_memory()
                 return {
                     "response": response,
                     "conversation_id": conversation.id
@@ -226,6 +246,7 @@ async def process_chat(request: ChatRequest):
                 if source not in sources:  # Avoid duplicates
                     sources.append(source)
         
+        cleanup_memory()
         return {
             "response": response,
             "sources": sources,
@@ -235,6 +256,7 @@ async def process_chat(request: ChatRequest):
         
     except Exception as e:
         print(f"Error processing chat: {e}")
+        cleanup_memory()
         return {"response": "I'm sorry, I couldn't process your request due to a technical error."}
 
 @app.post("/generate")
