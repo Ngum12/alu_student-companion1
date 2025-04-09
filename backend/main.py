@@ -19,23 +19,12 @@ from enhanced_capabilities.conversation_memory import ConversationMemory
 # Create FastAPI app
 app = FastAPI(title="ALU Chatbot Backend")
 
-# Add CORS middleware to allow frontend to access the API
+# Get CORS settings from environment or use default
+allowed_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:3001").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:8080", 
-        "http://127.0.0.1:8080",
-        "http://127.0.0.1:3000",
-        "http://192.168.42.230:3000",  
-        # For Hugging Face Spaces - add your specific URLs when you know them
-        # "https://your-huggingface-space-name.hf.space",
-        "*",  # Allow all origins for development
-
-        "http://localhost:8080",  # Add this line for your current frontend URL
-        "http://127.0.0.1:8080",  # Also add this alternative URL
-
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
